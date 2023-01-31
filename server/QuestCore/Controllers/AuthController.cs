@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AuthService.DataContracts.Interfaces;
+using AuthService.DataContracts.User;
+using CommonInfrastructure.Http;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace QuestCore.Controllers
 {
@@ -7,79 +12,50 @@ namespace QuestCore.Controllers
     [Route("api/[controller]/[action]")]
     public class AuthController : Controller
     {
-        // GET: AuthController
-        public ActionResult Index()
-        {
-            return View();
+        private IAuthApi _authApi;
+        public AuthController(IAuthApi authApi)
+        {              
+            _authApi = authApi;
         }
 
-        // GET: AuthController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: AuthController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: AuthController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public Task<CommonHttpResponse<UserViewModel>> Register(CreateUserContract createContract)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return _authApi.RegisterAsync(createContract);
         }
 
-        // GET: AuthController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: AuthController/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public Task<CommonHttpResponse<UserViewModel>> Login(LoginContract contract)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+            return _authApi.LoginAsync(contract);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync()
+        {
+            var userName = User.FindFirst(ClaimTypes.Name);
+            var password = User.FindFirst(ClaimTypes.Hash);
+
+            if (User.Identity.IsAuthenticated && userName != null && password != null)
+            {    
+                return await _authApi.GetUserInfoAsync(new LoginContract()
+                {
+                    Password = password.Value,
+                    UserName = userName.Value
+                });
             }
-            catch
+            else
             {
-                return View();
+                return new CommonHttpResponse<UserViewModel>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
+                    Errors = new string[] { }
+                };
             }
         }
 
-        // GET: AuthController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
 
-        // POST: AuthController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

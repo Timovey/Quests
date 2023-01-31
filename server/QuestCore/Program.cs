@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using QuestCore.Data;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using System.Text.Json;
+using QuestCore.Middleware;
+using AuthService.DataContracts.Interfaces;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +16,6 @@ if (builder.Environment.IsDevelopment())
     //builder.UseDeveloperExceptionPage();
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    //options.UseSqlServer(builder.Configuration[$"MsSqlServerLogsDb:{connectionString}"])
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -35,7 +27,7 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
@@ -61,12 +53,13 @@ builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 
 }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateLifetime = false,
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
@@ -83,24 +76,21 @@ builder.Services.AddAuthentication(option =>
 
 builder.Services.AddCors(x => x.AddDefaultPolicy(xx => { xx.AllowAnyOrigin(); xx.AllowAnyHeader(); }));
 
+var refitSettings = new RefitSettings
+{
+    ContentSerializer = new SystemTextJsonContentSerializer(
+        new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }
+    )
+};
 
 
-////!_! ------------------ Auth
-//var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
-//builder.Services.AddRefitClient<IAuthApi>(refitSettings)
-//    .ConfigureHttpClient(c => c.BaseAddress = authAddress);
-
-////!_! ------------------ SD
-//var sdAddress = new Uri(builder.Configuration["SdSettings:BaseAddress"]);
-//builder.Services.AddRefitClient<IContractClientApi>(refitSettings)
-//    .ConfigureHttpClient(c => c.BaseAddress = sdAddress);
-//builder.Services.AddRefitClient<IStandApi>(refitSettings)
-//    .ConfigureHttpClient(c => c.BaseAddress = sdAddress);
-//builder.Services.AddRefitClient<IContractApi>(refitSettings)
-//    .ConfigureHttpClient(c => c.BaseAddress = sdAddress);
-//builder.Services.AddRefitClient<IContainerApi>(refitSettings)
-//    .ConfigureHttpClient(c => c.BaseAddress = sdAddress);
-
+//!_! ------------------ Auth
+var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
+builder.Services.AddRefitClient<IAuthApi>(refitSettings)
+    .ConfigureHttpClient(c => c.BaseAddress = authAddress);
 
 
 var app = builder.Build();
@@ -119,7 +109,11 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
+//добавляет пользователя к запросам
+//app.UseAddUser();
 
 app.MapControllers();
+
+
 
 app.Run();
