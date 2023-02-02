@@ -1,5 +1,5 @@
 ﻿using AuthService.Database.Models;
-using AuthService.DataContracts.User;
+using AuthService.DataContracts.RefreshToken;
 using AutoMapper;
 
 namespace AuthService.Database.Mappers
@@ -11,9 +11,9 @@ namespace AuthService.Database.Mappers
     {
         public MappingProfile()
         {
-            //----------------------------- User
-            CreateMap<CreateUserContract, User>();
-            CreateMap<User, UserViewModel>();
+            //----------------------------- Refresh
+            CreateMap<CreateRefreshTokenContract, RefreshToken>();
+            CreateMap<RefreshToken, RefreshTokenViewModel>();
         }
     }
 

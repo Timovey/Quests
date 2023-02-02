@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using AuthService.Database;
-using AuthService.Database.Interfaces;
-using AuthService.Database.Implements;
 using AuthService.Core.BusinessLogic;
 using AuthService.Database.Mappers;
 using AuthService.Core.HelperModels;
@@ -13,6 +11,10 @@ using System.Text;
 using AuthService.Core.Mappers;
 using AuthService.Database.Models;
 using Microsoft.AspNetCore.Identity;
+using AuthService.Database.Implements;
+using AuthService.Database.Interfaces;
+using AuthService.Main.Services;
+using AuthService.Main.SettingModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,15 +29,16 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+
 // For Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationUserRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
 //!_! ------------------ Congigure
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<JwtRefreshSetting>(builder.Configuration.GetSection("JwtRefresh"));
 builder.Services.Configure<SecretSetting>(builder.Configuration.GetSection("Secret"));
+builder.Services.Configure<RefreshTokenServiceSetting>(builder.Configuration.GetSection("RefreshTokenService"));
 
 
 builder.Services.AddControllers();
@@ -54,6 +57,7 @@ builder.Services.AddAuthentication(option =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateLifetime = true,
+        ValidateAudience = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
@@ -69,14 +73,15 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<CoreMapperProfile>());
 //builder.Services.AddCors(x => x.AddDefaultPolicy(xx => { xx.AllowAnyOrigin(); xx.AllowAnyHeader(); }));
 
 
-builder.Services.AddScoped<IUserStorage, UserStorage>();
 builder.Services.AddScoped<UserLogic>();
 builder.Services.AddScoped<GenerateTokenHelper>();
 builder.Services.AddScoped<PasswordHashHelper>();
+builder.Services.AddScoped<IRefreshStorage, RefreshStorage>();
 
+
+builder.Services.AddHostedService<RemoveOldRefreshTokenService>();
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {

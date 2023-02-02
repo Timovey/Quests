@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace AuthService.DataContracts.User
+﻿namespace AuthService.DataContracts.User
 {
     public class UserViewModel
     {
@@ -27,11 +25,11 @@ namespace AuthService.DataContracts.User
         /// <summary>
         /// Токен пользователя
         /// </summary>
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         /// <summary>
         /// Refresh Токен пользователя
         /// </summary>
-        public string RefreshToken { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

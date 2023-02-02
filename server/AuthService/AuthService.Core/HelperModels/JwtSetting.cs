@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AuthService.Core.HelperModels
 {
@@ -13,6 +12,8 @@ namespace AuthService.Core.HelperModels
         public string Audience { get; set; }
 
         public int TokenExpiresMinutes { get; set; }
+
+        public int RefreshTokenExpiresMinutes { get; set; }
 
         public SymmetricSecurityKey GetSymmetricSecurityKey()
         {

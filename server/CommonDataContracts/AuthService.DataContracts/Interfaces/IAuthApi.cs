@@ -1,7 +1,6 @@
 ﻿using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
 using Refit;
-using System.Net.Http;
 
 namespace AuthService.DataContracts.Interfaces
 {
@@ -12,10 +11,13 @@ namespace AuthService.DataContracts.Interfaces
         Task<CommonHttpResponse<UserViewModel>> RegisterAsync([Body]CreateUserContract createContract);
 
         [Post("/Auth/GetUserInfo")]
-        Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync([Body] LoginContract contract);
+        Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync([Body] LoginTokenContract contract);
 
         [Post("/Auth/Login")]
         Task<CommonHttpResponse<UserViewModel>> LoginAsync([Body]LoginContract contract);
+
+        [Post("/Auth/Refresh")]
+        Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync(LoginTokenContract contract);
 
         #endregion
     }

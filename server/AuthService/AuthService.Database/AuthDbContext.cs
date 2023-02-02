@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using AuthService.Database.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthService.Database
 {
-    public class AuthDbContext : IdentityDbContext<ApplicationUser>
+    public class AuthDbContext : IdentityDbContext<ApplicationUser, ApplicationUserRole, int>
     {
-        //internal DbSet<User> Users { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options)
         {
         }

@@ -2,9 +2,7 @@
 using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AuthService.Main.Controllers
 {
@@ -22,26 +20,26 @@ namespace AuthService.Main.Controllers
         [HttpPost]
         public Task<CommonHttpResponse<UserViewModel>> RegisterAsync(CreateUserContract createContract)
         {
-            return _userLogic.Register2Async(createContract);
+            return _userLogic.RegisterAsync(createContract);
         }
 
         [HttpPost]
         public Task<CommonHttpResponse<UserViewModel>> LoginAsync(LoginContract contract)
         {
-            return _userLogic.Login2Async(contract);
+            return _userLogic.LoginAsync(contract);
         }
 
         [HttpPost]
-        public Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync(LoginContract contract)
+        public Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync(LoginTokenContract contract)
         {
             return _userLogic.GetUserInfoAsync(contract);
         }
 
-        //[HttpPost]
-        //public Task<CommonHttpResponse<string>> GetTokenByRefresh(string token)
-        //{
-        //    return _userLogic.GetUserInfoAsync(contract);
-        //}
+        [HttpPost]
+        public Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync(LoginTokenContract contract)
+        {
+            return _userLogic.LoginByRefreshAsync(contract);
+        }
 
     }
 }
