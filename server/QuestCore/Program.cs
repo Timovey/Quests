@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text;
 using System.Text.Json;
-using QuestCore.Middleware;
 using AuthService.DataContracts.Interfaces;
 using Refit;
 
@@ -109,8 +107,7 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
-//добавляет пользователя к запросам
-//app.UseAddUser();
+
 
 app.MapControllers();
 

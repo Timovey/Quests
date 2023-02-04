@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System.Text.Json.Serialization;
 
 namespace CommonInfrastructure.Http
 {
@@ -11,11 +8,18 @@ namespace CommonInfrastructure.Http
     /// </summary>
     public class CommonHttpRequest
     {
+        public CommonHttpRequest()
+        {
+            RequestId = Guid.NewGuid();
+        }
+        [JsonIgnore]
         public Guid? RequestId { get; set; }
 
-        public string UserId { get; set; }
+        [JsonIgnore]
+        public string? RequestUserId { get; set; } = null;
 
-        public string UserName { get; set; }
+        [JsonIgnore]
+        public string? RequestUserName { get; set; } = null;
     }
 
 }

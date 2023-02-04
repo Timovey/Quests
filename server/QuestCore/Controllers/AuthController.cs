@@ -1,10 +1,7 @@
 ﻿using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace QuestCore.Controllers
 {
@@ -30,32 +27,21 @@ namespace QuestCore.Controllers
             return _authApi.LoginAsync(contract);
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync()
+        [HttpPost]
+        public Task<CommonHttpResponse<UserViewModel>> GetUserInfo(LoginTokenContract contract)
         {
-            var userName = User.FindFirst(ClaimTypes.Name);
-            var password = User.FindFirst(ClaimTypes.Hash);
-
-            if (User.Identity.IsAuthenticated && userName != null && password != null)
-            {    
-                return await _authApi.GetUserInfoAsync(new LoginContract()
-                {
-                    Password = password.Value,
-                    UserName = userName.Value
-                });
-            }
-            else
-            {
-                return new CommonHttpResponse<UserViewModel>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
-                    Errors = new string[] { }
-                };
-            }
+           return _authApi.GetUserInfoAsync(contract);
         }
 
+        [HttpPost]
+        public Task<CommonHttpResponse<UserViewModel>> LoginByRefresh(LoginTokenContract contract)
+        {
+            return _authApi.LoginByRefreshAsync(new LoginTokenContract()
+            {
+                Token = contract.Token,
+                RefreshToken = contract.RefreshToken,
+            });
+        }
 
     }
 }

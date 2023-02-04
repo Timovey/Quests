@@ -14,10 +14,10 @@ namespace AuthService.DataContracts.Interfaces
         Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync([Body] LoginTokenContract contract);
 
         [Post("/Auth/Login")]
-        Task<CommonHttpResponse<UserViewModel>> LoginAsync([Body]LoginContract contract);
+        Task<CommonHttpResponse<UserViewModel>> LoginAsync([Body] LoginContract contract);
 
-        [Post("/Auth/Refresh")]
-        Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync(LoginTokenContract contract);
+        [Post("/Auth/LoginByRefresh")]
+        Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync([Body] LoginTokenContract contract);
 
         #endregion
     }

@@ -2,13 +2,14 @@
 using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
+using CommonInfrastructure.Http.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Main.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-
+    [AddUserInRequest]
     public class AuthController : Controller, IAuthApi
     {
         private UserLogic _userLogic;
