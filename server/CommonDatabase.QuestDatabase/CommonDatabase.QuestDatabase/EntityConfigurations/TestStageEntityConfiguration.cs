@@ -4,11 +4,12 @@ using GenerateQuestsService.DataContracts.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class TestStageEntityConfiguration : IEntityTypeConfiguration<TestStage>
+    public class TestStageEntityConfiguration : BaseEntityTypeConfiguration<TestStage>
     {
-        public void Configure(EntityTypeBuilder<TestStage> builder)
+        public override void Configure(EntityTypeBuilder<TestStage> builder)
         {
             builder.ToTable("test_stage");
+            base.Configure(builder);
         }
     }
 }

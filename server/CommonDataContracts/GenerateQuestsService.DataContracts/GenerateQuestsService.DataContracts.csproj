@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="CommonContracts\" />
+    <PackageReference Include="CommonInfrastructure.Http" Version="1.0.9" />
+    <PackageReference Include="Refit" Version="6.3.2" />
   </ItemGroup>
 
 </Project>

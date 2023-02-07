@@ -43,5 +43,10 @@ namespace QuestCore.Controllers
             });
         }
 
+        [HttpPost]
+        public Task FF(CommonHttpRequest req)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

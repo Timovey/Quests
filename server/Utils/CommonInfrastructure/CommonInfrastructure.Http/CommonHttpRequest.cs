@@ -1,5 +1,5 @@
 ﻿
-using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CommonInfrastructure.Http
 {
@@ -12,13 +12,14 @@ namespace CommonInfrastructure.Http
         {
             RequestId = Guid.NewGuid();
         }
-        [JsonIgnore]
+
+        [SwaggerSchema(ReadOnly = true)]
         public Guid? RequestId { get; set; }
 
-        [JsonIgnore]
+        [SwaggerSchema(ReadOnly = true)]
         public string? RequestUserId { get; set; } = null;
 
-        [JsonIgnore]
+        [SwaggerSchema(ReadOnly = true)]
         public string? RequestUserName { get; set; } = null;
     }
 

@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class TextStageEntityConfiguration : IEntityTypeConfiguration<TextStage>
+    public class TextStageEntityConfiguration : BaseEntityTypeConfiguration<TextStage>
     {
-        public void Configure(EntityTypeBuilder<TextStage> builder)
+        public override void Configure(EntityTypeBuilder<TextStage> builder)
         {
             builder.ToTable("text_stage");
+            base.Configure(builder);
         }
     }
 }

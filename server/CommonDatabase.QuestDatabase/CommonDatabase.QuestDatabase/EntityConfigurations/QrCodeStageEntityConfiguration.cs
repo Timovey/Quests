@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class QrCodeStageEntityConfiguration : IEntityTypeConfiguration<QrCodeStage>
+    public class QrCodeStageEntityConfiguration : BaseEntityTypeConfiguration<QrCodeStage>
     {
-        public void Configure(EntityTypeBuilder<QrCodeStage> builder)
+        public override void Configure(EntityTypeBuilder<QrCodeStage> builder)
         {
             builder.ToTable("qrcode_stage");
+            base.Configure(builder);
         }
     }
 }

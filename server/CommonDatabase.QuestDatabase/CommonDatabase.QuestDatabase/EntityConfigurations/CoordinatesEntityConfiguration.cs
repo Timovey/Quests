@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class CoordinatesEntityConfiguration : IEntityTypeConfiguration<Coordinates>
+    public class CoordinatesEntityConfiguration : BaseEntityTypeConfiguration<Coordinates>
     {
-        public void Configure(EntityTypeBuilder<Coordinates> builder)
+        public override void Configure(EntityTypeBuilder<Coordinates> builder)
         {
             builder.ToTable("coordinates");
+            base.Configure(builder);
         }
     }
 }

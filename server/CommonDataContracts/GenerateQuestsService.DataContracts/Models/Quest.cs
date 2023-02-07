@@ -1,9 +1,10 @@
 ﻿
+using CommonInfrastructure.Http;
 using GenerateQuestsService.DataContracts.Models.Stages;
 
 namespace GenerateQuestsService.DataContracts.Models
 {
-    public class Quest
+    public class Quest : CommonHttpRequest
     {
         public string Title { get; set; }
 

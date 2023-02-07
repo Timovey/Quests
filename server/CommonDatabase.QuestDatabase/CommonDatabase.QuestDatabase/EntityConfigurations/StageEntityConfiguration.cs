@@ -5,11 +5,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class StageEntityConfiguration : IEntityTypeConfiguration<Stage>
+    public class StageEntityConfiguration : BaseEntityTypeConfiguration<Stage>
     {
-        public void Configure(EntityTypeBuilder<Stage> builder)
+        public override void Configure(EntityTypeBuilder<Stage> builder)
         {
             builder.ToTable("stage");
+            base.Configure(builder);
         }
     }
 }
