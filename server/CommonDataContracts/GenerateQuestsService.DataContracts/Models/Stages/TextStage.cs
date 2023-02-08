@@ -2,9 +2,9 @@
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public class TextStage : Stage
+    public class TextStage
     {
-        public override StageType Type { get; } = StageType.Text;
+        public StageType Type { get; } = StageType.Text;
 
         public string Text { get; internal set; }
     }

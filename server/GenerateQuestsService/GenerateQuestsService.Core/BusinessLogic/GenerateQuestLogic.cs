@@ -2,7 +2,7 @@
 using CommonInfrastructure.Extension;
 using CommonInfrastructure.Http;
 using CommonInfrastructure.Http.Helpers;
-using GenerateQuestsService.DataContracts.Models;
+using GenerateQuestsService.DataContracts.DataContracts;
 using System.Net;
 
 
@@ -16,7 +16,7 @@ namespace GenerateQuestsService.Core.BusinessLogic
             _generateQuestStorage = generateQuestStorage;
         }
 
-        public async Task<CommonHttpResponse> CreateQuestAsync(Quest quest)
+        public async Task<CommonHttpResponse> CreateQuestAsync(CreateQuestContract quest)
         {
             if(quest == null)
             {
@@ -32,7 +32,7 @@ namespace GenerateQuestsService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse(
                     HttpStatusCode.InternalServerError,
                                     ex.ToExceptionDetails(),
-                    $"Ошибка выполнения метода {nameof(CreateQuestAsync)} ReqId : {quest.RequestId}");
+                    $"Ошибка выполнения метода {nameof(CreateQuestAsync)} ReqId : ");
             }
         }
 

@@ -2,9 +2,9 @@
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public class QrCodeStage : Stage
+    public class QrCodeStage
     {
-        public override StageType Type { get; } = StageType.QrCode;
+        public StageType Type { get; } = StageType.QrCode;
 
         public string Code { get; set; }
     }

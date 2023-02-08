@@ -1,15 +1,15 @@
-﻿using GenerateQuestsService.DataContracts.Models.Stages;
+﻿using CommonDatabase.QuestDatabase.Models.Stages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class CoordinatesEntityConfiguration : BaseEntityTypeConfiguration<Coordinates>
+    internal class CoordinatesEntityConfiguration : BaseEntityTypeConfiguration<CoordinatesEntity>
     {
-        public override void Configure(EntityTypeBuilder<Coordinates> builder)
+        public override void Configure(EntityTypeBuilder<CoordinatesEntity> builder)
         {
-            builder.ToTable("coordinates");
             base.Configure(builder);
+            builder.ToTable("coordinates");
         }
     }
 }

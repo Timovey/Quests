@@ -1,16 +1,15 @@
 using CommonDatabase.QuestDatabase;
 using CommonDatabase.QuestDatabase.Implements;
 using CommonDatabase.QuestDatabase.Interfaces;
+using CommonDatabase.QuestDatabase.MappingProfiles;
 using GenerateQuestsService.Core.BusinessLogic;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpLogging;
+using GenerateQuestsService.DataContracts.DataContracts;
+using GenerateQuestsService.DataContracts.DataContracts.Stages;
+using GenerateQuestsService.DataContracts.Models.Stages;
+using GenerateQuestsService.Main.DeserializationHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
 using System.Text.Json;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +30,17 @@ builder.Services.AddScoped<GenerateQuestLogic>();
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.AllowInputFormatterExceptionMessages  = true;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<BaseStage>());
+});
+
+//Auto mapper
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfile>());
+
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

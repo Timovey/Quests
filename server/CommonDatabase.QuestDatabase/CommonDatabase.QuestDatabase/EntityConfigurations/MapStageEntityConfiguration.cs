@@ -1,15 +1,15 @@
-﻿using GenerateQuestsService.DataContracts.Models.Stages;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class MapStageEntityConfiguration : BaseEntityTypeConfiguration<MapStage>
+    internal class MapStageEntityConfiguration : StageEntityConfiguration<MapStageEntity>
     {
-        public override void Configure(EntityTypeBuilder<MapStage> builder)
+        public override void Configure(EntityTypeBuilder<MapStageEntity> builder)
         {
-            builder.ToTable("map_stage");
             base.Configure(builder);
+            builder.ToTable("map_stage");
         }
     }
 }

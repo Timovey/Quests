@@ -1,15 +1,15 @@
-﻿using GenerateQuestsService.DataContracts.Models.Stages;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class VideoStageEntityConfiguration : BaseEntityTypeConfiguration<VideoStage>
+    internal class VideoStageEntityConfiguration : StageEntityConfiguration<VideoStageEntity>
     {
-        public override void Configure(EntityTypeBuilder<VideoStage> builder)
+        public override void Configure(EntityTypeBuilder<VideoStageEntity> builder)
         {
-            builder.ToTable("video_stage");
             base.Configure(builder);
+            builder.ToTable("video_stage");
         }
     }
 }

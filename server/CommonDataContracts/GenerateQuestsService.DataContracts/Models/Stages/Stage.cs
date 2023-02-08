@@ -1,12 +1,12 @@
-﻿using CommonInfrastructure.Http;
-using GenerateQuestsService.DataContracts.Enums;
+﻿using GenerateQuestsService.DataContracts.Enums;
+using System.Runtime.Serialization;
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public abstract class Stage : CommonHttpRequest
+    public class Stage
     {
         public string Title { get; set; }
 
-        public abstract StageType Type { get; }
+        public StageType Type { get; }
     }
 }

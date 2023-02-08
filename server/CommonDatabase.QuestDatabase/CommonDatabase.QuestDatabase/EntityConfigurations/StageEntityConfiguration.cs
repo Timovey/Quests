@@ -1,16 +1,16 @@
-﻿
-using GenerateQuestsService.DataContracts.Models.Stages;
+﻿using CommonDatabase.QuestDatabase.Models.Stages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    public class StageEntityConfiguration : BaseEntityTypeConfiguration<Stage>
+    internal abstract class StageEntityConfiguration<T> : BaseEntityTypeConfiguration<T> 
+    where T : StageEntity
     {
-        public override void Configure(EntityTypeBuilder<Stage> builder)
+        public override void Configure(EntityTypeBuilder<T> builder)
         {
-            builder.ToTable("stage");
             base.Configure(builder);
+            builder.ToTable("stage");
         }
     }
 }

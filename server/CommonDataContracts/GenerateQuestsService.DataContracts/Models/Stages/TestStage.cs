@@ -2,8 +2,8 @@
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public class TestStage : Stage
+    public class TestStage
     {
-        public override StageType Type { get; } = StageType.Test;
+        public StageType Type { get; } = StageType.Test;
     }
 }

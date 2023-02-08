@@ -1,5 +1,5 @@
 ﻿using CommonInfrastructure.Http;
-using GenerateQuestsService.DataContracts.Models;
+using GenerateQuestsService.DataContracts.DataContracts;
 using Refit;
 
 namespace GenerateQuestsService.DataContracts.Interfaces
@@ -8,7 +8,7 @@ namespace GenerateQuestsService.DataContracts.Interfaces
     {
         [Post("/GenerateQuests/CreateQuest")]
           Task<CommonHttpResponse> CreateQuestAsync(
-          [Body] Quest quest
+          [Body] CreateQuestContract contract
        );
     }
 }

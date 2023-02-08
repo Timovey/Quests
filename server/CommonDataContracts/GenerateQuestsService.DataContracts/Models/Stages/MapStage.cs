@@ -2,9 +2,9 @@
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public class MapStage : Stage
+    public class MapStage
     {
-        public override StageType Type { get; } = StageType.Map;
+        public StageType Type { get; } = StageType.Map;
 
         public Coordinates Coords { get; set; }
     }
