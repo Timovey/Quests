@@ -7,13 +7,14 @@ namespace CommonDatabase.QuestDatabase
 {
     public class QuestContext : DbContext
     {
-        internal DbSet<QuestEntity> Quests { get; set; }
-        internal DbSet<CoordinatesEntity> Coordinates { get; set; }
-        internal DbSet<MapStageEntity> MapStages { get; set; }
-        internal DbSet<QrCodeStageEntity> QrCodeStages { get; set; }
-        internal DbSet<TestStageEntity> TestStages { get; set; }
-        internal DbSet<TextStageEntity> TextStages { get; set; }
-        internal DbSet<VideoStageEntity> VideoStages { get; set; }
+        public DbSet<QuestEntity> Quests { get; set; }
+        public DbSet<CoordinatesEntity> Coordinates { get; set; }
+        public DbSet<StageEntity> Stages { get; set; }
+        public DbSet<MapStageEntity> MapStages { get; set; }
+        public DbSet<QrCodeStageEntity> QrCodeStages { get; set; }
+        public DbSet<TestStageEntity> TestStages { get; set; }
+        public DbSet<TextStageEntity> TextStages { get; set; }
+        public DbSet<VideoStageEntity> VideoStages { get; set; }
 
         public QuestContext(DbContextOptions<QuestContext> options)
         : base(options)

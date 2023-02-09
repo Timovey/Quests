@@ -1,15 +1,17 @@
+using AuthService.DataContracts.Interfaces;
 using CommonDatabase.QuestDatabase;
 using CommonDatabase.QuestDatabase.Implements;
 using CommonDatabase.QuestDatabase.Interfaces;
 using CommonDatabase.QuestDatabase.MappingProfiles;
 using GenerateQuestsService.Core.BusinessLogic;
 using GenerateQuestsService.DataContracts.DataContracts;
-using GenerateQuestsService.DataContracts.DataContracts.Stages;
 using GenerateQuestsService.DataContracts.Models.Stages;
 using GenerateQuestsService.Main.DeserializationHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Refit;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,9 +34,11 @@ builder.Services.AddScoped<GenerateQuestLogic>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.AllowInputFormatterExceptionMessages  = true;
+    options.AllowInputFormatterExceptionMessages = true;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<BaseStage>());
+    //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    //options.JsonSerializerOptions.
+    options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
 });
 
 //Auto mapper
@@ -43,8 +47,23 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfil
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var refitSettings = new RefitSettings
+{
+    ContentSerializer = new SystemTextJsonContentSerializer(
+        new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }
+    )
+};
+
+//!_! ------------------ Auth
+var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
+builder.Services.AddRefitClient<IAuthApi>(refitSettings)
+    .ConfigureHttpClient(c => c.BaseAddress = authAddress);
 
 
 var app = builder.Build();

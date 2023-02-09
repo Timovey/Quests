@@ -4,7 +4,7 @@ using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class TestStageEntityConfiguration : StageEntityConfiguration<TestStageEntity>
+    public class TestStageEntityConfiguration : StageEntityConfiguration<TestStageEntity>
     {
         public override void Configure(EntityTypeBuilder<TestStageEntity> builder)
         {

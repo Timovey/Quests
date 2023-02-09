@@ -1,4 +1,5 @@
-﻿using AuthService.DataContracts.User;
+﻿using AuthService.DataContracts.CommonContracts;
+using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
 using Refit;
 
@@ -18,6 +19,9 @@ namespace AuthService.DataContracts.Interfaces
 
         [Post("/Auth/LoginByRefresh")]
         Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync([Body] LoginTokenContract contract);
+
+        [Get("/Auth/GetUserById")]
+        Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync([Query] GetContract contract);
 
         #endregion
     }

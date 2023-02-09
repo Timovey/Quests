@@ -1,8 +1,8 @@
 ﻿namespace CommonDatabase.QuestDatabase.Models.Stages
 {
-    internal class MapStageEntity : StageEntity
+    public class MapStageEntity : StageEntity
     {
 
-        internal CoordinatesEntity Coords { get; set; }
+        public CoordinatesEntity Coords { get; set; }
     }
 }

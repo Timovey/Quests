@@ -1,5 +1,6 @@
 ﻿using GenerateQuestsService.DataContracts.Enums;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
@@ -7,6 +8,8 @@ namespace GenerateQuestsService.DataContracts.Models.Stages
     {
         public string Title { get; set; }
 
-        public StageType Type { get; }
+        [JsonPropertyOrder(-5)]
+        [JsonPropertyName("type")]
+        public virtual StageType Type { get; }
     }
 }

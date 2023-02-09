@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\CommonDatabase.QuestDatabase\CommonDatabase.QuestDatabase\CommonDatabase.QuestDatabase.csproj" />
+    <ProjectReference Include="..\..\CommonDataContracts\AuthService.DataContracts\AuthService.DataContracts.csproj" />
     <ProjectReference Include="..\..\CommonDataContracts\GenerateQuestsService.DataContracts\GenerateQuestsService.DataContracts.csproj" />
   </ItemGroup>
 

@@ -3,9 +3,9 @@ using System.Runtime.Serialization;
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {
-    public class VideoStage
+    public class VideoStage : Stage
     {
-        public StageType Type { get;} = StageType.Video;
+        public override StageType Type { get;} = StageType.Video;
 
         public string Url { get; set; }
 

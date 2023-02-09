@@ -3,6 +3,7 @@ using GenerateQuestsService.Core.BusinessLogic;
 using GenerateQuestsService.DataContracts.DataContracts;
 using GenerateQuestsService.DataContracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Refit;
 
 namespace GenerateQuestsService.Main.Controllers
 {
@@ -23,9 +24,9 @@ namespace GenerateQuestsService.Main.Controllers
         }
 
         [HttpPost]
-        public Task<CommonHttpResponse> TestAsync(SimpleContract contract)
+        public Task<CommonHttpResponse<QuestViewModel>> GetQuestAsync(GetQuestContract contract)
         {
-            return _generateQuestLogic.CreateQuestAsync(null);
+            return _generateQuestLogic.GetQuestAsync(contract);
         }
     }
 }

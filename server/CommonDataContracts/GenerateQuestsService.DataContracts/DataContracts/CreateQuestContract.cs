@@ -4,12 +4,7 @@ using System.Runtime.Serialization;
 
 namespace GenerateQuestsService.DataContracts.DataContracts
 {
-    //[KnownType(typeof(MapStage))]
-    //[KnownType(typeof(QrCodeStage))]
-    //[KnownType(typeof(TestStage))]
-    //[KnownType(typeof(TextStage))]
-    //[KnownType(typeof(VideoStage))]
-    public class CreateQuestContract
+    public class CreateQuestContract : CommonHttpRequest
     {
         public string Title { get; set; }
 
@@ -17,8 +12,6 @@ namespace GenerateQuestsService.DataContracts.DataContracts
 
         public string Img { get; set; }
 
-        public Stage Stage { get; set; }
-
-        public Base d { get; set; }
+        public IList<Stage> Stages { get; set; }
     }
 }

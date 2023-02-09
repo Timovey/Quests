@@ -8,7 +8,10 @@ namespace GenerateQuestsService.DataContracts.Interfaces
     {
         [Post("/GenerateQuests/CreateQuest")]
           Task<CommonHttpResponse> CreateQuestAsync(
-          [Body] CreateQuestContract contract
-       );
+          [Body] CreateQuestContract contract);
+
+        [Post("/GenerateQuests/GetQuest")]
+        Task<CommonHttpResponse<QuestViewModel>> GetQuestAsync(
+          [Query] GetQuestContract contract);
     }
 }

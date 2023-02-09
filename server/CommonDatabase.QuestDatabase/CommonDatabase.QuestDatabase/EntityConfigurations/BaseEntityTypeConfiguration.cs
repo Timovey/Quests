@@ -8,7 +8,7 @@ namespace CommonDatabase.QuestDatabase.EntityConfigurations
     /// Базовая сущность конфигурации
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal abstract class BaseEntityTypeConfiguration<T> : IEntityTypeConfiguration<T>
+    public abstract class BaseEntityTypeConfiguration<T> : IEntityTypeConfiguration<T>
     where T : BaseEntity
     {
         public virtual void Configure(EntityTypeBuilder<T> builder)

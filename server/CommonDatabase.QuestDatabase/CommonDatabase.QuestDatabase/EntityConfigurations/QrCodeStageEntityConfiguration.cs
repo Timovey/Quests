@@ -4,7 +4,7 @@ using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class QrCodeStageEntityConfiguration : StageEntityConfiguration<QrCodeStageEntity>
+    public class QrCodeStageEntityConfiguration : StageEntityConfiguration<QrCodeStageEntity>
     {
         public override void Configure(EntityTypeBuilder<QrCodeStageEntity> builder)
         {

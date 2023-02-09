@@ -1,11 +1,13 @@
-﻿namespace CommonDatabase.QuestDatabase.Models.Stages
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CommonDatabase.QuestDatabase.Models.Stages
 {
-    internal abstract class StageEntity : BaseEntity
+    public abstract class StageEntity : BaseEntity
     {
-        internal string Title { get; set; }
+        public string Title { get; set; }
 
-        internal byte StageType { get; set; }
+        public byte StageType { get; set; }
 
-        internal QuestEntity Quest { get; set; }
+        public QuestEntity Quest { get; set; }
     }
 }

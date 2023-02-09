@@ -1,9 +1,14 @@
 ﻿using GenerateQuestsService.DataContracts.Models.Stages;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace GenerateQuestsService.DataContracts.DataContracts
 {
-    public class QuestViewModel
+    public class ShortQuestViewModel
     {
         public int Id { get; set; }
 
@@ -13,8 +18,7 @@ namespace GenerateQuestsService.DataContracts.DataContracts
 
         public string Img { get; set; }
 
-        public IList<Stage> Stages { get; set; }
-
+        public int StageCount { get; set; }
         /// <summary>
         /// ИД Автора квеста
         /// </summary>

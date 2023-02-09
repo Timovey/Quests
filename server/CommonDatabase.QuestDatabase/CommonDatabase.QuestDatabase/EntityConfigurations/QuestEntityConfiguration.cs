@@ -4,7 +4,7 @@ using CommonDatabase.QuestDatabase.Models;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class QuestEntityConfiguration : BaseEntityTypeConfiguration<QuestEntity>
+    public class QuestEntityConfiguration : BaseEntityTypeConfiguration<QuestEntity>
     {
         public override void Configure(EntityTypeBuilder<QuestEntity> builder)
         {

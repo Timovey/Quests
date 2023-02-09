@@ -1,4 +1,5 @@
 ﻿using AuthService.Core.BusinessLogic;
+using AuthService.DataContracts.CommonContracts;
 using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
@@ -40,6 +41,12 @@ namespace AuthService.Main.Controllers
         public Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync(LoginTokenContract contract)
         {
             return _userLogic.LoginByRefreshAsync(contract);
+        }
+
+        [HttpGet]
+        public Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync([FromQuery]GetContract contract)
+        {
+            return _userLogic.GetUserByIdAsync(contract);
         }
 
     }

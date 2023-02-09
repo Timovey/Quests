@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CommonDatabase.QuestDatabase.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    [Migration("20230208111646_add_quest_to_stage")]
-    partial class addquesttostage
+    [Migration("20230209153807_add_user")]
+    partial class adduser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace CommonDatabase.QuestDatabase.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Quest", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.QuestEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -43,11 +43,15 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -57,7 +61,7 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("quest", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.Coordinates", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.CoordinatesEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +72,8 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
 
                     b.Property<decimal>("Latitude")
                         .HasColumnType("numeric");
@@ -76,15 +81,21 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.Property<decimal>("Longitude")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("map_stage_id")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
+                    b.HasIndex("map_stage_id")
+                        .IsUnique();
+
                     b.ToTable("coordinates", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.Stage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -92,8 +103,17 @@ namespace CommonDatabase.QuestDatabase.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
                     b.Property<int>("QuestId")
                         .HasColumnType("integer");
+
+                    b.Property<byte>("StageType")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -103,24 +123,14 @@ namespace CommonDatabase.QuestDatabase.Migrations
 
                     b.HasIndex("QuestId");
 
-                    b.ToTable("Stage");
+                    b.ToTable("Stages");
 
                     b.UseTptMappingStrategy();
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.MapStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.MapStageEntity", b =>
                 {
-                    b.HasBaseType("GenerateQuestsService.DataContracts.Models.Stages.Stage");
-
-                    b.Property<int>("CoordsId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.HasIndex("CoordsId");
+                    b.HasBaseType("CommonDatabase.QuestDatabase.Models.Stages.StageEntity");
 
                     b.HasIndex("Id")
                         .IsUnique();
@@ -128,18 +138,13 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("map_stage", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.QrCodeStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.QrCodeStageEntity", b =>
                 {
-                    b.HasBaseType("GenerateQuestsService.DataContracts.Models.Stages.Stage");
+                    b.HasBaseType("CommonDatabase.QuestDatabase.Models.Stages.StageEntity");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
 
                     b.HasIndex("Id")
                         .IsUnique();
@@ -147,14 +152,9 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("qrcode_stage", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.TestStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.TestStageEntity", b =>
                 {
-                    b.HasBaseType("GenerateQuestsService.DataContracts.Models.Stages.Stage");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                    b.HasBaseType("CommonDatabase.QuestDatabase.Models.Stages.StageEntity");
 
                     b.HasIndex("Id")
                         .IsUnique();
@@ -162,14 +162,9 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("test_stage", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.TextStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.TextStageEntity", b =>
                 {
-                    b.HasBaseType("GenerateQuestsService.DataContracts.Models.Stages.Stage");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                    b.HasBaseType("CommonDatabase.QuestDatabase.Models.Stages.StageEntity");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -181,14 +176,9 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("text_stage", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.VideoStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.VideoStageEntity", b =>
                 {
-                    b.HasBaseType("GenerateQuestsService.DataContracts.Models.Stages.Stage");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                    b.HasBaseType("CommonDatabase.QuestDatabase.Models.Stages.StageEntity");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -200,9 +190,20 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("video_stage", (string)null);
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.Stage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.CoordinatesEntity", b =>
                 {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Quest", "Quest")
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.MapStageEntity", "MapStage")
+                        .WithOne("Coords")
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.CoordinatesEntity", "map_stage_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MapStage");
+                });
+
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", b =>
+                {
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.QuestEntity", "Quest")
                         .WithMany("Stages")
                         .HasForeignKey("QuestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -211,62 +212,60 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.Navigation("Quest");
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.MapStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.MapStageEntity", b =>
                 {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Coordinates", "Coords")
-                        .WithMany()
-                        .HasForeignKey("CoordsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Stage", null)
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", null)
                         .WithOne()
-                        .HasForeignKey("GenerateQuestsService.DataContracts.Models.Stages.MapStage", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Coords");
-                });
-
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.QrCodeStage", b =>
-                {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Stage", null)
-                        .WithOne()
-                        .HasForeignKey("GenerateQuestsService.DataContracts.Models.Stages.QrCodeStage", "Id")
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.MapStageEntity", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.TestStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.QrCodeStageEntity", b =>
                 {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Stage", null)
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", null)
                         .WithOne()
-                        .HasForeignKey("GenerateQuestsService.DataContracts.Models.Stages.TestStage", "Id")
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.QrCodeStageEntity", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.TextStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.TestStageEntity", b =>
                 {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Stage", null)
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", null)
                         .WithOne()
-                        .HasForeignKey("GenerateQuestsService.DataContracts.Models.Stages.TextStage", "Id")
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.TestStageEntity", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Stages.VideoStage", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.TextStageEntity", b =>
                 {
-                    b.HasOne("GenerateQuestsService.DataContracts.Models.Stages.Stage", null)
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", null)
                         .WithOne()
-                        .HasForeignKey("GenerateQuestsService.DataContracts.Models.Stages.VideoStage", "Id")
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.TextStageEntity", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GenerateQuestsService.DataContracts.Models.Quest", b =>
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.VideoStageEntity", b =>
+                {
+                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", null)
+                        .WithOne()
+                        .HasForeignKey("CommonDatabase.QuestDatabase.Models.Stages.VideoStageEntity", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.QuestEntity", b =>
                 {
                     b.Navigation("Stages");
+                });
+
+            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.MapStageEntity", b =>
+                {
+                    b.Navigation("Coords")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

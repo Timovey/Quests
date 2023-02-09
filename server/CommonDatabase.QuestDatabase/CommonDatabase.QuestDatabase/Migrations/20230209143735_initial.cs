@@ -12,21 +12,6 @@ namespace CommonDatabase.QuestDatabase.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "coordinates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Latitude = table.Column<decimal>(type: "numeric", nullable: false),
-                    Longitude = table.Column<decimal>(type: "numeric", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_coordinates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "quest",
                 columns: table => new
                 {
@@ -35,7 +20,7 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Img = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    isdeleted = table.Column<bool>(name: "is_deleted", type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -43,45 +28,40 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stage",
+                name: "Stages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
-                    QuestId = table.Column<int>(type: "integer", nullable: true)
+                    StageType = table.Column<byte>(type: "smallint", nullable: false),
+                    QuestId = table.Column<int>(type: "integer", nullable: false),
+                    isdeleted = table.Column<bool>(name: "is_deleted", type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stage", x => x.Id);
+                    table.PrimaryKey("PK_Stages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Stage_quest_QuestId",
+                        name: "FK_Stages_quest_QuestId",
                         column: x => x.QuestId,
                         principalTable: "quest",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "map_stage",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    CoordsId = table.Column<int>(type: "integer", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_map_stage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_map_stage_Stage_Id",
+                        name: "FK_map_stage_Stages_Id",
                         column: x => x.Id,
-                        principalTable: "Stage",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_map_stage_coordinates_CoordsId",
-                        column: x => x.CoordsId,
-                        principalTable: "coordinates",
+                        principalTable: "Stages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -91,16 +71,15 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
-                    Code = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Code = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_qrcode_stage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_qrcode_stage_Stage_Id",
+                        name: "FK_qrcode_stage_Stages_Id",
                         column: x => x.Id,
-                        principalTable: "Stage",
+                        principalTable: "Stages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -109,16 +88,15 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 name: "test_stage",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_test_stage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_test_stage_Stage_Id",
+                        name: "FK_test_stage_Stages_Id",
                         column: x => x.Id,
-                        principalTable: "Stage",
+                        principalTable: "Stages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -128,16 +106,15 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Text = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_text_stage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_text_stage_Stage_Id",
+                        name: "FK_text_stage_Stages_Id",
                         column: x => x.Id,
-                        principalTable: "Stage",
+                        principalTable: "Stages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -147,16 +124,37 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
-                    Url = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Url = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_video_stage", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_video_stage_Stage_Id",
+                        name: "FK_video_stage_Stages_Id",
                         column: x => x.Id,
-                        principalTable: "Stage",
+                        principalTable: "Stages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "coordinates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Latitude = table.Column<decimal>(type: "numeric", nullable: false),
+                    Longitude = table.Column<decimal>(type: "numeric", nullable: false),
+                    mapstageid = table.Column<int>(name: "map_stage_id", type: "integer", nullable: false),
+                    isdeleted = table.Column<bool>(name: "is_deleted", type: "boolean", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_coordinates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_coordinates_map_stage_map_stage_id",
+                        column: x => x.mapstageid,
+                        principalTable: "map_stage",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -168,9 +166,10 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_map_stage_CoordsId",
-                table: "map_stage",
-                column: "CoordsId");
+                name: "IX_coordinates_map_stage_id",
+                table: "coordinates",
+                column: "map_stage_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_map_stage_Id",
@@ -191,8 +190,8 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stage_QuestId",
-                table: "Stage",
+                name: "IX_Stages_QuestId",
+                table: "Stages",
                 column: "QuestId");
 
             migrationBuilder.CreateIndex(
@@ -218,7 +217,7 @@ namespace CommonDatabase.QuestDatabase.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "map_stage");
+                name: "coordinates");
 
             migrationBuilder.DropTable(
                 name: "qrcode_stage");
@@ -233,10 +232,10 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 name: "video_stage");
 
             migrationBuilder.DropTable(
-                name: "coordinates");
+                name: "map_stage");
 
             migrationBuilder.DropTable(
-                name: "Stage");
+                name: "Stages");
 
             migrationBuilder.DropTable(
                 name: "quest");

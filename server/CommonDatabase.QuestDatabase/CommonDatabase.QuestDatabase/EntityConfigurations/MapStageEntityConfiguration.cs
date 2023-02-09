@@ -4,7 +4,7 @@ using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class MapStageEntityConfiguration : StageEntityConfiguration<MapStageEntity>
+    public class MapStageEntityConfiguration : StageEntityConfiguration<MapStageEntity>
     {
         public override void Configure(EntityTypeBuilder<MapStageEntity> builder)
         {

@@ -1,7 +1,7 @@
 ﻿namespace CommonDatabase.QuestDatabase.Models.Stages
 {
-    internal class QrCodeStageEntity : StageEntity
+    public class QrCodeStageEntity : StageEntity
     {
-        internal string Code { get; set; }
+        public string Code { get; set; }
     }
 }

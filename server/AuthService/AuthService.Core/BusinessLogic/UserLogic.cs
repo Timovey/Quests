@@ -15,6 +15,7 @@ using AuthService.Database.Implements;
 using AuthService.DataContracts.RefreshToken;
 using AuthService.Database.Interfaces;
 using System.Diagnostics.Contracts;
+using AuthService.DataContracts.CommonContracts;
 
 namespace AuthService.Core.BusinessLogic
 {
@@ -257,6 +258,38 @@ namespace AuthService.Core.BusinessLogic
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
                      $"Ошибка выполнения метода {nameof(LoginByRefreshAsync)}");
+            }
+        }
+
+        public async Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync(GetContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(initialError:
+                    "Пустой запрос");
+            }
+            try
+            {
+                //находим пользователя по Id
+                var user = await _userManager.FindByIdAsync(contract.Id.ToString());
+
+                //мапим в простую viewModel
+                var result = _mapper.Map<ShortUserViewModel>(user);
+
+                if (user != null)
+                {
+                    return CommonHttpHelper.BuildSuccessResponse(result, HttpStatusCode.OK);
+                }
+                
+                return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(initialError:
+                    "Нет пользователя с таким id");
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                     $"Ошибка выполнения метода {nameof(GetUserByIdAsync)}");
             }
         }
 

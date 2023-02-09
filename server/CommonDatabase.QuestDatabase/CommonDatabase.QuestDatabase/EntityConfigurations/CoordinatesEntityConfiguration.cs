@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class CoordinatesEntityConfiguration : BaseEntityTypeConfiguration<CoordinatesEntity>
+    public class CoordinatesEntityConfiguration : BaseEntityTypeConfiguration<CoordinatesEntity>
     {
         public override void Configure(EntityTypeBuilder<CoordinatesEntity> builder)
         {

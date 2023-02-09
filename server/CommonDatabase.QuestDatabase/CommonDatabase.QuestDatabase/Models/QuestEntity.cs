@@ -2,14 +2,18 @@
 
 namespace CommonDatabase.QuestDatabase.Models
 {
-    internal class QuestEntity : BaseEntity
+    public class QuestEntity : BaseEntity
     {
-        internal string Title { get; set; }
+        public int UserId { get; set; }
 
-        internal string Description { get; set; }
+        public string Title { get; set; }
 
-        internal string Img { get; set; }
+        public string Description { get; set; }
 
-        internal IList<StageEntity> Stages { get; set; }
+        public string Img { get; set; }
+
+        public int StageCount => Stages.Count;
+
+        public IList<StageEntity> Stages { get; set; }
     }
 }

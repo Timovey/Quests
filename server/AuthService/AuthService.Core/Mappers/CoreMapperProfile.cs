@@ -10,6 +10,7 @@ namespace AuthService.Core.Mappers
         {
             //----------------------------- User
             CreateMap<ApplicationUser, UserViewModel>();
+            CreateMap<ApplicationUser, ShortUserViewModel>();
             CreateMap<UserViewModel, ApplicationUser>();
         }
     }

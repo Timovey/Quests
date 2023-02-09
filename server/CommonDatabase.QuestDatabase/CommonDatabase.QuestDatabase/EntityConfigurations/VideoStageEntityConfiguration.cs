@@ -4,7 +4,7 @@ using CommonDatabase.QuestDatabase.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.EntityConfigurations
 {
-    internal class VideoStageEntityConfiguration : StageEntityConfiguration<VideoStageEntity>
+    public class VideoStageEntityConfiguration : StageEntityConfiguration<VideoStageEntity>
     {
         public override void Configure(EntityTypeBuilder<VideoStageEntity> builder)
         {

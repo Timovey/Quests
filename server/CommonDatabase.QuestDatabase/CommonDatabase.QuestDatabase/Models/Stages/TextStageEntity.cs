@@ -1,7 +1,7 @@
 ﻿namespace CommonDatabase.QuestDatabase.Models.Stages
 {
-    internal class TextStageEntity : StageEntity
+    public class TextStageEntity : StageEntity
     {
-        internal string Text { get; set; }
+        public string Text { get; set; }
     }
 }
