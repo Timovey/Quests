@@ -18,9 +18,8 @@ namespace GenerateQuestsService.DataContracts.DataContracts
         /// <summary>
         /// ИД Автора квеста
         /// </summary>
-        [JsonIgnore]
         public int UserId { get; set; }
 
-        public string Author { get; set; }
+        public string UserName { get; set; }
     }
 }

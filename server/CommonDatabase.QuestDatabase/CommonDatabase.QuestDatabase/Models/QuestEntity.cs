@@ -12,7 +12,7 @@ namespace CommonDatabase.QuestDatabase.Models
 
         public string Img { get; set; }
 
-        public int StageCount => Stages.Count;
+        public int StageCount { get ; set; }
 
         public IList<StageEntity> Stages { get; set; }
     }

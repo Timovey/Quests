@@ -6,6 +6,12 @@ namespace GenerateQuestsService.DataContracts.Models.Stages
 {
     public class Stage
     {
+        /// <summary>
+        /// internal set - получить в модели id можно,присвоить нельзя
+        /// </summary>
+
+        public int Order { get; set; }
+
         public string Title { get; set; }
 
         [JsonPropertyOrder(-5)]

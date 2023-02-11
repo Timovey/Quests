@@ -20,8 +20,11 @@ namespace AuthService.DataContracts.Interfaces
         [Post("/Auth/LoginByRefresh")]
         Task<CommonHttpResponse<UserViewModel>> LoginByRefreshAsync([Body] LoginTokenContract contract);
 
-        [Get("/Auth/GetUserById")]
-        Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync([Query] GetContract contract);
+        [Get("/Auth/GetUserById/{id}")]
+        Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync([AliasAs("id")] int id);
+
+        [Post("/Auth/GetFilteredUsers")]
+        public Task<CommonHttpResponse<IList<ShortUserViewModel>>> GetFilteredUsersAsync([Body] GetFilteredUsersContract contract);
 
         #endregion
     }

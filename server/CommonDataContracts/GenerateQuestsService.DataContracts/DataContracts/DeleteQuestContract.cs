@@ -1,4 +1,5 @@
 ﻿using CommonInfrastructure.Http;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace GenerateQuestsService.DataContracts.DataContracts
 {
-    public class GetFilteredQuestsContract : CommonHttpRequest
+    public class DeleteQuestContract : CommonHttpRequest
     {
-
-        public int? Page { get; set; }
-
-        public int? UserId { get; set; }
-
-        public int? Count { get; set; }
-
+        [AliasAs("id")]
+        public int Id { get; set; }
     }
 }

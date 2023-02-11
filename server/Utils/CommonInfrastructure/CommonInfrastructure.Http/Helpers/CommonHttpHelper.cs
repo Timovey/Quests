@@ -29,6 +29,44 @@ namespace CommonInfrastructure.Http.Helpers
             };
         }
 
+        public static CommonHttpResponse BuildNotFoundErrorResponse(HttpStatusCode statusCode = HttpStatusCode.NotFound,
+           List<string> extErrors = null,
+           string initialError = null)
+        {
+            if (initialError == null) initialError = $"Сущность не найдена";
+            var errors = new List<string> { initialError };
+            if (extErrors != null)
+            {
+                errors.AddRange(extErrors);
+            }
+
+            return new CommonHttpResponse
+            {
+                Success = false,
+                StatusCode = statusCode,
+                Errors = errors.ToArray()
+            };
+        }
+
+        public static CommonHttpResponse<T> BuildNotFoundErrorResponse<T>(HttpStatusCode statusCode = HttpStatusCode.NotFound,
+           List<string> extErrors = null,
+           string initialError = null)
+        {
+            if (initialError == null) initialError = $"Сущность не найдена";
+            var errors = new List<string> { initialError };
+            if (extErrors != null)
+            {
+                errors.AddRange(extErrors);
+            }
+
+            return new CommonHttpResponse<T>
+            {
+                Success = false,
+                Data = default(T),
+                StatusCode = statusCode,
+                Errors = errors.ToArray()
+            };
+        }
         public static CommonHttpResponse<T> BuildErrorResponse<T>(
             HttpStatusCode statusCode = HttpStatusCode.InternalServerError,
             List<string> extErrors = null,

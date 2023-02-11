@@ -23,10 +23,28 @@ namespace GenerateQuestsService.Main.Controllers
             return _generateQuestLogic.CreateQuestAsync(quest);
         }
 
+        [HttpPut]
+        public Task<CommonHttpResponse<bool>> UpdateQuestAsync(UpdateQuestContract contract)
+        {
+            return _generateQuestLogic.UpdateQuestAsync(contract);
+        }
+
         [HttpPost]
         public Task<CommonHttpResponse<QuestViewModel>> GetQuestAsync(GetQuestContract contract)
         {
             return _generateQuestLogic.GetQuestAsync(contract);
+        }
+
+        [HttpPost]
+        public Task<CommonHttpResponse<IList<ShortQuestViewModel>>> GetFilteredQuestsAsync(GetFilteredQuestsContract contract)
+        {
+            return _generateQuestLogic.GetFilteredQuestsAsync(contract);
+        }
+
+        [HttpDelete("{id}")]
+        public Task<CommonHttpResponse<bool>> DeleteQuestAsync(DeleteQuestContract contract)
+        {
+            return _generateQuestLogic.DeleteQuestAsync(contract);
         }
     }
 }

@@ -3,12 +3,14 @@ using CommonDatabase.QuestDatabase;
 using CommonDatabase.QuestDatabase.Implements;
 using CommonDatabase.QuestDatabase.Interfaces;
 using CommonDatabase.QuestDatabase.MappingProfiles;
+using CommonDatabase.QuestDatabase.Triggers;
 using GenerateQuestsService.Core.BusinessLogic;
 using GenerateQuestsService.DataContracts.DataContracts;
 using GenerateQuestsService.DataContracts.Models.Stages;
 using GenerateQuestsService.Main.DeserializationHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Refit;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -22,8 +24,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 
 builder.Services.AddDbContext<QuestContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"))
+    options
+    .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .UseTriggers(triggerOptions => {
+        triggerOptions.AddTrigger<SetStageCountTrigger>();
+    })
 );
 
 builder.Services.AddScoped<IGenerateQuestStorage, GenerateQuestStorage>();

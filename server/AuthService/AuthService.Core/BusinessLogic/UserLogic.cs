@@ -16,6 +16,7 @@ using AuthService.DataContracts.RefreshToken;
 using AuthService.Database.Interfaces;
 using System.Diagnostics.Contracts;
 using AuthService.DataContracts.CommonContracts;
+using System.Collections.Generic;
 
 namespace AuthService.Core.BusinessLogic
 {
@@ -149,7 +150,7 @@ namespace AuthService.Core.BusinessLogic
 
                     return CommonHttpHelper.BuildSuccessResponse(result, HttpStatusCode.OK);
                 }
-                return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
                     "Нет пользователя с таким логином и паролем");
             }
             catch (Exception ex)
@@ -182,6 +183,11 @@ namespace AuthService.Core.BusinessLogic
                     //находим пользователя по Id
                     var user = await _userManager.FindByIdAsync(userId.Value.ToString());
 
+                    if(user == null)
+                    {
+                        return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                    "Нет такого пользователя");
+                    }
                     //мапим во viewModel
                     var result = _mapper.Map<UserViewModel>(user);
                     //добавляем в к вью модели токен
@@ -261,9 +267,9 @@ namespace AuthService.Core.BusinessLogic
             }
         }
 
-        public async Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync(GetContract contract)
+        public async Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync(int id)
         {
-            if (contract == null)
+            if (id < 0)
             {
                 return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(initialError:
                     "Пустой запрос");
@@ -271,7 +277,7 @@ namespace AuthService.Core.BusinessLogic
             try
             {
                 //находим пользователя по Id
-                var user = await _userManager.FindByIdAsync(contract.Id.ToString());
+                var user = await _userManager.FindByIdAsync(id.ToString());
 
                 //мапим в простую viewModel
                 var result = _mapper.Map<ShortUserViewModel>(user);
@@ -280,8 +286,8 @@ namespace AuthService.Core.BusinessLogic
                 {
                     return CommonHttpHelper.BuildSuccessResponse(result, HttpStatusCode.OK);
                 }
-                
-                return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(initialError:
+
+                return CommonHttpHelper.BuildNotFoundErrorResponse<ShortUserViewModel>(initialError:
                     "Нет пользователя с таким id");
             }
             catch (Exception ex)
@@ -290,6 +296,35 @@ namespace AuthService.Core.BusinessLogic
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
                      $"Ошибка выполнения метода {nameof(GetUserByIdAsync)}");
+            }
+        }
+
+        public async Task<CommonHttpResponse<IList<ShortUserViewModel>>> GetFilteredUsersAsync(GetFilteredUsersContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<IList<ShortUserViewModel>> (initialError:
+                    "Пустой запрос");
+            }
+            try
+            {
+                //находим пользователей по Id
+                var users = _userManager.Users.Where(u => contract.Ids.Contains(u.Id)).ToList();
+
+                var result = new List<ShortUserViewModel>();
+                foreach (var user in users)
+                {
+                    //мапим в простую viewModel
+                    result.Add(_mapper.Map<ShortUserViewModel>(user));
+                }
+                return CommonHttpHelper.BuildSuccessResponse<IList<ShortUserViewModel>>(result);
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<IList<ShortUserViewModel>>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                     $"Ошибка выполнения метода {nameof(GetFilteredUsersAsync)}");
             }
         }
 

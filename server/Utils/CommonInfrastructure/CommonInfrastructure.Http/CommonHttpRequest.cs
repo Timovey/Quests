@@ -13,13 +13,13 @@ namespace CommonInfrastructure.Http
             RequestId = Guid.NewGuid();
         }
 
-        [SwaggerSchema(ReadOnly = true)]
+        [Obsolete]
         public Guid? RequestId { get; set; }
 
-        [SwaggerSchema(ReadOnly = true)]
-        public string? RequestUserId { get; set; } = null;
+        [Obsolete]
+        public int? RequestUserId { get; set; } = null;
 
-        [SwaggerSchema(ReadOnly = true)]
+        [Obsolete]
         public string? RequestUserName { get; set; } = null;
     }
 

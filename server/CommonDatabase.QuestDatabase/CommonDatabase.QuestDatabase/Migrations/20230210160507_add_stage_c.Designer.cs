@@ -2,6 +2,7 @@
 using CommonDatabase.QuestDatabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CommonDatabase.QuestDatabase.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    partial class QuestContextModelSnapshot : ModelSnapshot
+    [Migration("20230210160507_add_stage_c")]
+    partial class addstagec
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,48 +98,6 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.ToTable("coordinates", (string)null);
                 });
 
-            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.QuestionEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string[]>("Answers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string[]>("RightAnswers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<byte>("Type")
-                        .HasColumnType("smallint");
-
-                    b.Property<int>("test_stage_id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.HasIndex("test_stage_id");
-
-                    b.ToTable("question", (string)null);
-                });
-
             modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -150,9 +111,6 @@ namespace CommonDatabase.QuestDatabase.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_deleted");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
 
                     b.Property<int>("QuestId")
                         .HasColumnType("integer");
@@ -246,17 +204,6 @@ namespace CommonDatabase.QuestDatabase.Migrations
                     b.Navigation("MapStage");
                 });
 
-            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.QuestionEntity", b =>
-                {
-                    b.HasOne("CommonDatabase.QuestDatabase.Models.Stages.TestStageEntity", "TestStage")
-                        .WithMany("Questions")
-                        .HasForeignKey("test_stage_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TestStage");
-                });
-
             modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.StageEntity", b =>
                 {
                     b.HasOne("CommonDatabase.QuestDatabase.Models.QuestEntity", "Quest")
@@ -322,11 +269,6 @@ namespace CommonDatabase.QuestDatabase.Migrations
                 {
                     b.Navigation("Coords")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CommonDatabase.QuestDatabase.Models.Stages.TestStageEntity", b =>
-                {
-                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

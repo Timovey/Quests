@@ -28,7 +28,7 @@ namespace CommonInfrastructure.Http.Attributes
                 }
                 if (user.HasClaim(el => el.Type.Equals(ClaimTypes.NameIdentifier)))
                 {
-                    model.RequestUserId = user.FindFirst(ClaimTypes.NameIdentifier.ToString()).Value;
+                    model.RequestUserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier.ToString()).Value);
                 }
             }
             base.OnActionExecuting(context);

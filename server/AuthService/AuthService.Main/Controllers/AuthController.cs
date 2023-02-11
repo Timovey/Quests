@@ -43,11 +43,18 @@ namespace AuthService.Main.Controllers
             return _userLogic.LoginByRefreshAsync(contract);
         }
 
-        [HttpGet]
-        public Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync([FromQuery]GetContract contract)
+        [HttpGet("{id}")]
+        public Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync(int id)
         {
-            return _userLogic.GetUserByIdAsync(contract);
+            return _userLogic.GetUserByIdAsync(id);
         }
+
+        [HttpPost]
+        public Task<CommonHttpResponse<IList<ShortUserViewModel>>> GetFilteredUsersAsync(GetFilteredUsersContract contract)
+        {
+            return _userLogic.GetFilteredUsersAsync(contract);
+        }
+
 
     }
 }

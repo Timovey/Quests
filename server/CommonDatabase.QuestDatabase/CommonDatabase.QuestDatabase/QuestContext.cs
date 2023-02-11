@@ -9,6 +9,7 @@ namespace CommonDatabase.QuestDatabase
     {
         public DbSet<QuestEntity> Quests { get; set; }
         public DbSet<CoordinatesEntity> Coordinates { get; set; }
+        public DbSet<QuestionEntity> Questions { get; set; }
         public DbSet<StageEntity> Stages { get; set; }
         public DbSet<MapStageEntity> MapStages { get; set; }
         public DbSet<QrCodeStageEntity> QrCodeStages { get; set; }

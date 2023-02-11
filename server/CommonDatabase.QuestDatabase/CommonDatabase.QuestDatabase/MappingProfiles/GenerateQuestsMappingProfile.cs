@@ -2,6 +2,7 @@
 using CommonDatabase.QuestDatabase.Models;
 using CommonDatabase.QuestDatabase.Models.Stages;
 using GenerateQuestsService.DataContracts.DataContracts;
+using GenerateQuestsService.DataContracts.Models;
 using GenerateQuestsService.DataContracts.Models.Stages;
 
 namespace CommonDatabase.QuestDatabase.MappingProfiles
@@ -28,6 +29,7 @@ namespace CommonDatabase.QuestDatabase.MappingProfiles
                 .Include<VideoStageEntity, VideoStage>();
 
             CreateMap<Coordinates, CoordinatesEntity>();
+            CreateMap<Question, QuestionEntity>();
             CreateMap<MapStage, MapStageEntity>();
             CreateMap<QrCodeStage, QrCodeStageEntity>();
             CreateMap<TestStage, TestStageEntity>();
@@ -35,6 +37,7 @@ namespace CommonDatabase.QuestDatabase.MappingProfiles
             CreateMap<VideoStage, VideoStageEntity>();
 
             CreateMap<CoordinatesEntity, Coordinates>();
+            CreateMap<QuestionEntity, Question>();
             CreateMap<MapStageEntity, MapStage>();
             CreateMap<QrCodeStageEntity, QrCodeStage>();
             CreateMap<TestStageEntity, TestStage>();
