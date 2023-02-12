@@ -1,13 +1,9 @@
-﻿using GenerateQuestsService.DataContracts.DataContracts;
-using GenerateQuestsService.DataContracts.Enums;
+﻿using GenerateQuestsService.DataContracts.Enums;
 using GenerateQuestsService.DataContracts.Models.Stages;
-using Microsoft.VisualBasic.FileIO;
-using System;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
+using System.Text.Json;
 
-namespace GenerateQuestsService.Main.DeserializationHelpers
+namespace QuestCore.DeserializationHelper
 {
     public class StageJsonConverterHelper<T> : JsonConverter<T> where T : Stage
     {
@@ -29,7 +25,7 @@ namespace GenerateQuestsService.Main.DeserializationHelpers
         //не является ли базовый тип Stage 
         //!typeToConvert.BaseType.Equals(typeof(Stage))
         public override bool CanConvert(Type typeToConvert) =>
-            typeof(Stage).IsAssignableFrom(typeToConvert) 
+            typeof(Stage).IsAssignableFrom(typeToConvert)
             && !typeToConvert.BaseType.Equals(typeof(Stage));
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -46,9 +42,7 @@ namespace GenerateQuestsService.Main.DeserializationHelpers
                     string decriptorName = nameof(Stage.Type).ToLower();
                     //если нет такого свойства в json кидаем ошибку
                     if (!jsonDocument.RootElement.TryGetProperty(decriptorName, out var typeProperty))
-                    {
                         throw new JsonException();
-                    }
 
                     //процесс получения типа, к которому мы должны преобразовать
                     //сначала получаем значение enum и его строковое представление
@@ -62,12 +56,12 @@ namespace GenerateQuestsService.Main.DeserializationHelpers
                     //var jsonObject = (T)JsonSerializer.Deserialize(jsonString, type, options)!;
                     return (T)JsonSerializer.Deserialize(jsonString, type, options)!;
                 }
-            }  
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new NotSupportedException(ex.Message);
             }
-         }
+        }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {

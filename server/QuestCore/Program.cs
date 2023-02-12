@@ -5,17 +5,29 @@ using System.Text;
 using System.Text.Json;
 using AuthService.DataContracts.Interfaces;
 using Refit;
+using GenerateQuestsService.DataContracts.Interfaces;
+using GenerateQuestsService.DataContracts.Models.Stages;
+using QuestCore.DeserializationHelper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-if (builder.Environment.IsDevelopment())
+//подавляется фильтр для валидации модели по умолчанию
+builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    //builder.UseDeveloperExceptionPage();
-}
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.AllowInputFormatterExceptionMessages = true;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swagger =>
@@ -74,21 +86,27 @@ builder.Services.AddAuthentication(option =>
 
 builder.Services.AddCors(x => x.AddDefaultPolicy(xx => { xx.AllowAnyOrigin(); xx.AllowAnyHeader(); }));
 
+var jsonSerializeOptions = new JsonSerializerOptions()
+{
+    PropertyNameCaseInsensitive = false,
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+};
+jsonSerializeOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
+
 var refitSettings = new RefitSettings
 {
-    ContentSerializer = new SystemTextJsonContentSerializer(
-        new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        }
-    )
+    ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializeOptions),
 };
-
 
 //!_! ------------------ Auth
 var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
 builder.Services.AddRefitClient<IAuthApi>(refitSettings)
     .ConfigureHttpClient(c => c.BaseAddress = authAddress);
+
+//!_! ------------------ Auth
+var generateQuestAddress = new Uri(builder.Configuration["GenerateQuestSettings:BaseAddress"]);
+builder.Services.AddRefitClient<IGenerateQuestsApi>(refitSettings)
+    .ConfigureHttpClient(c => c.BaseAddress = generateQuestAddress);
 
 
 var app = builder.Build();

@@ -10,7 +10,7 @@ namespace AuthService.Main.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    [AddUserInRequest]
+    [ModelStateValidationActionFilter]
     public class AuthController : Controller, IAuthApi
     {
         private UserLogic _userLogic;

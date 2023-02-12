@@ -1,13 +1,14 @@
 ﻿using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
+using CommonInfrastructure.Http.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace QuestCore.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private IAuthApi _authApi;
         public AuthController(IAuthApi authApi)
@@ -41,12 +42,6 @@ namespace QuestCore.Controllers
                 Token = contract.Token,
                 RefreshToken = contract.RefreshToken,
             });
-        }
-
-        [HttpPost]
-        public Task FF(CommonHttpRequest req)
-        {
-            return Task.CompletedTask;
         }
     }
 }

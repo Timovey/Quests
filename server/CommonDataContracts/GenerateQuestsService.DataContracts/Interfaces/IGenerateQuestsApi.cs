@@ -6,25 +6,25 @@ namespace GenerateQuestsService.DataContracts.Interfaces
 {
     public interface IGenerateQuestsApi
     {
-        [Post("/GenerateQuests/CreateQuest")]
+        [Post("/GenerateQuest/CreateQuest")]
           Task<CommonHttpResponse> CreateQuestAsync(
           [Body] CreateQuestContract contract);
 
-        [Put("/GenerateQuests/UpdateQuest")]
+        [Put("/GenerateQuest/UpdateQuest")]
         Task<CommonHttpResponse<bool>> UpdateQuestAsync(
           [Body] UpdateQuestContract contract);
 
-        [Post("/GenerateQuests/GetQuest")]
+        [Post("/GenerateQuest/GetQuest")]
         Task<CommonHttpResponse<QuestViewModel>> GetQuestAsync(
           [Body] GetQuestContract contract);
 
-        [Post("/GenerateQuests/GetFilteredQuests")]
+        [Post("/GenerateQuest/GetFilteredQuests")]
         Task<CommonHttpResponse<IList<ShortQuestViewModel>>> GetFilteredQuestsAsync(
           [Body] GetFilteredQuestsContract contract);
 
-        [Delete("/GenerateQuests/DeleteQuest/{id}")]
+        [Delete("/GenerateQuest/DeleteQuest")]
         Task<CommonHttpResponse<bool>> DeleteQuestAsync(
-          [Body] DeleteQuestContract contract);
+           DeleteQuestContract contract);
 
     }
 }

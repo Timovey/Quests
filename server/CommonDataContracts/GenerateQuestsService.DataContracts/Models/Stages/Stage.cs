@@ -14,8 +14,6 @@ namespace GenerateQuestsService.DataContracts.Models.Stages
 
         public string Title { get; set; }
 
-        [JsonPropertyOrder(-5)]
-        [JsonPropertyName("type")]
         public virtual StageType Type { get; }
     }
 }

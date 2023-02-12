@@ -17,12 +17,14 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//подавляется фильтр для валидации модели по умолчанию
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
 
 
+//используем Postgesql и триггеры
 builder.Services.AddDbContext<QuestContext>(options =>
     options
     .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -31,22 +33,21 @@ builder.Services.AddDbContext<QuestContext>(options =>
     })
 );
 
+//раздел с конфигурацией ЖЦ 
 builder.Services.AddScoped<IGenerateQuestStorage, GenerateQuestStorage>();
 builder.Services.AddScoped<GenerateQuestLogic>();
 
 
-// Add services to the container.
-
+//добавляем контроллеры и конфигурируем Json опции при десериализации моделей
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.AllowInputFormatterExceptionMessages = true;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    //options.JsonSerializerOptions.
     options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-//Auto mapper
+//добавляем Auto mapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfile>());
 
 
@@ -55,6 +56,9 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfil
 //builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//настраиваем Refit
+//ставим опцию сравнения без учета регистра
+// "Value" = "value"
 var refitSettings = new RefitSettings
 {
     ContentSerializer = new SystemTextJsonContentSerializer(
@@ -65,6 +69,8 @@ var refitSettings = new RefitSettings
     )
 };
 
+
+//подключаемм Refit клиенты
 //!_! ------------------ Auth
 var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
 builder.Services.AddRefitClient<IAuthApi>(refitSettings)

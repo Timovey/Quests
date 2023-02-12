@@ -1,4 +1,5 @@
 ﻿using CommonInfrastructure.Http;
+using CommonInfrastructure.Http.Attributes;
 using GenerateQuestsService.Core.BusinessLogic;
 using GenerateQuestsService.DataContracts.DataContracts;
 using GenerateQuestsService.DataContracts.Interfaces;
@@ -41,7 +42,7 @@ namespace GenerateQuestsService.Main.Controllers
             return _generateQuestLogic.GetFilteredQuestsAsync(contract);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public Task<CommonHttpResponse<bool>> DeleteQuestAsync(DeleteQuestContract contract)
         {
             return _generateQuestLogic.DeleteQuestAsync(contract);
