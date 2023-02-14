@@ -12,6 +12,8 @@ namespace AuthService.Core.Mappers
             CreateMap<ApplicationUser, UserViewModel>();
             CreateMap<ApplicationUser, ShortUserViewModel>();
             CreateMap<UserViewModel, ApplicationUser>();
+            CreateMap<UpdateUserContract, ApplicationUser>();
+            CreateMap<CreateUserContract, ApplicationUser>();
         }
     }
 }

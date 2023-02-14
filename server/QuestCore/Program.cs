@@ -7,10 +7,12 @@ using AuthService.DataContracts.Interfaces;
 using Refit;
 using GenerateQuestsService.DataContracts.Interfaces;
 using GenerateQuestsService.DataContracts.Models.Stages;
-using QuestCore.DeserializationHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
+using QuestCore.TokenHelpers;
+using GenerateQuestsService.DataContracts.JsonHelpers;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.AllowInputFormatterExceptionMessages = true;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+   // options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -70,10 +74,14 @@ builder.Services.AddAuthentication(option =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateLifetime = true,
+        ValidateAudience = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        //Собственный валидатор жизни токена
+        //т.к. встроенный работает "с запозданием"
+        LifetimeValidator = QuestCoreLifetimeValidator.CheckLifeTime
     };
 });
 
@@ -86,6 +94,8 @@ builder.Services.AddAuthentication(option =>
 
 builder.Services.AddCors(x => x.AddDefaultPolicy(xx => { xx.AllowAnyOrigin(); xx.AllowAnyHeader(); }));
 
+//устанавливаем конфигурацию refit
+//сравнивание без регистра и camelCase
 var jsonSerializeOptions = new JsonSerializerOptions()
 {
     PropertyNameCaseInsensitive = false,
@@ -103,7 +113,7 @@ var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
 builder.Services.AddRefitClient<IAuthApi>(refitSettings)
     .ConfigureHttpClient(c => c.BaseAddress = authAddress);
 
-//!_! ------------------ Auth
+//!_! ------------------ Generate Quest Service
 var generateQuestAddress = new Uri(builder.Configuration["GenerateQuestSettings:BaseAddress"]);
 builder.Services.AddRefitClient<IGenerateQuestsApi>(refitSettings)
     .ConfigureHttpClient(c => c.BaseAddress = generateQuestAddress);
@@ -128,7 +138,4 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-
-
-
 app.Run();

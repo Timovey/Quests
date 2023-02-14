@@ -1,6 +1,8 @@
-﻿namespace AuthService.DataContracts.User
+﻿using CommonInfrastructure.Http;
+
+namespace AuthService.DataContracts.User
 {
-    public class UserViewModel
+    public class UpdateUserContract : CommonHttpRequest
     {
         /// <summary>
         /// Id пользователя
@@ -23,18 +25,13 @@
         public string UserName { get; set; }
 
         /// <summary>
+        /// Пароль пользователя
+        /// </summary>
+        public string Password { get; set; }
+
+        /// <summary>
         /// Аватар пользователя
         /// </summary>
         public string Img { get; set; }
-
-        /// <summary>
-        /// Токен пользователя
-        /// </summary>
-        public string? Token { get; set; }
-
-        /// <summary>
-        /// Refresh Токен пользователя
-        /// </summary>
-        public string? RefreshToken { get; set; }
     }
 }

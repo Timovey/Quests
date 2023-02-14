@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AuthService.DataContracts.User
-{       
+﻿namespace AuthService.DataContracts.User
+{
     /// <summary>
     /// моделя для отображения в карточках
     /// </summary>

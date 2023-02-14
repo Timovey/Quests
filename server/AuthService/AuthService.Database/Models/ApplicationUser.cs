@@ -10,5 +10,9 @@ namespace AuthService.Database.Models
         public string Name { get; set; }
 
         public string Surname { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+
+        public string Img { get; set; }
     }
 }

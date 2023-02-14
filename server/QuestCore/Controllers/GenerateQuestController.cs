@@ -11,7 +11,7 @@ namespace QuestCore.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    //[Authorize]
+    [Authorize]
     [AddUserInRequest]
     [ModelStateValidationActionFilter]
     public class GenerateQuestController : ControllerBase
@@ -35,9 +35,9 @@ namespace QuestCore.Controllers
         }
 
         [HttpGet("{id}")]
-        public Task<CommonHttpResponse<QuestViewModel>> GetQuest(int id)
+        public Task<CommonHttpResponse<QuestViewModel>> GetQuest([FromRoute]GetQuestContract contract)
         {
-            return _generateQuestsApi.GetQuestAsync(new GetQuestContract() { Id = id });
+            return _generateQuestsApi.GetQuestAsync(contract);
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace QuestCore.Controllers
         }
 
         [HttpDelete("{id}")]
-        public Task<CommonHttpResponse<bool>> DeleteQuest(DeleteQuestContract contract)
+        public Task<CommonHttpResponse<bool>> DeleteQuest([FromRoute]DeleteQuestContract contract)
         {
             return _generateQuestsApi.DeleteQuestAsync(contract);
         }

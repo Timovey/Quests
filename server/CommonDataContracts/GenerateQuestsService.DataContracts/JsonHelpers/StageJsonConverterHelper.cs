@@ -3,7 +3,7 @@ using GenerateQuestsService.DataContracts.Models.Stages;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
-namespace QuestCore.DeserializationHelper
+namespace GenerateQuestsService.DataContracts.JsonHelpers
 {
     public class StageJsonConverterHelper<T> : JsonConverter<T> where T : Stage
     {
@@ -42,15 +42,37 @@ namespace QuestCore.DeserializationHelper
                     string decriptorName = nameof(Stage.Type).ToLower();
                     //если нет такого свойства в json кидаем ошибку
                     if (!jsonDocument.RootElement.TryGetProperty(decriptorName, out var typeProperty))
-                        throw new JsonException();
+                    {
+                        throw new JsonException("Нет поля, обозначающего тип этапа");
+                    }
 
                     //процесс получения типа, к которому мы должны преобразовать
-                    //сначала получаем значение enum и его строковое представление
-                    var enumName = ((StageType)typeProperty.GetByte()).ToString();
+                    //
+                    //попробуем преобразовать строку или число к enum
+                    // "1" тоже будет преобразовано
+                    // в случае успеха получаем строковое представление в ловеркейсе
 
-                    var type = _types.FirstOrDefault(x => x.Name.Contains(enumName));
+                    StageType res = StageType.Unknow;
+                    string enumName = null;
+                    if (typeProperty.ValueKind == JsonValueKind.String 
+                        && Enum.TryParse(typeProperty.GetString(), true, out res))
+                    {
+                        enumName = res.ToString().ToLower();
+                    }
+                    else if (typeProperty.ValueKind == JsonValueKind.Number
+                        && Enum.TryParse(typeProperty.GetByte().ToString(), true, out res))
+                    {
+                        enumName = res.ToString().ToLower();
+                    }
+                    else
+                    {
+                        throw new JsonException("Невозможно преобразовать enum");
+                    }
+
+                    //из всех возможных типов находим со схожим названием
+                    var type = _types.FirstOrDefault(x => x.Name.ToLower().Contains(enumName));
                     if (type == null)
-                        throw new JsonException();
+                        throw new JsonException("Невозможно преобразовать enum");
                     var jsonString = jsonDocument.RootElement.GetRawText();
 
                     //var jsonObject = (T)JsonSerializer.Deserialize(jsonString, type, options)!;

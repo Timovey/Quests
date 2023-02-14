@@ -24,7 +24,7 @@ namespace GenerateQuestsService.DataContracts.Interfaces
 
         [Delete("/GenerateQuest/DeleteQuest")]
         Task<CommonHttpResponse<bool>> DeleteQuestAsync(
-           DeleteQuestContract contract);
+         [Body] DeleteQuestContract contract);
 
     }
 }

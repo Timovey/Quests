@@ -13,7 +13,7 @@ namespace CommonDatabase.QuestDatabase.Triggers
     {
         public Task BeforeSave(ITriggerContext<QuestEntity> context, CancellationToken cancellationToken)
         {
-            if(context.ChangeType == ChangeType.Added || context.ChangeType == ChangeType.Modified)
+            if(context.ChangeType == ChangeType.Added || (context.ChangeType == ChangeType.Modified && !context.Entity.IsDeleted))
             {
                 context.Entity.StageCount = context.Entity.Stages.Count;
             }

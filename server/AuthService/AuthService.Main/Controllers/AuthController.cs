@@ -1,5 +1,4 @@
 ﻿using AuthService.Core.BusinessLogic;
-using AuthService.DataContracts.CommonContracts;
 using AuthService.DataContracts.Interfaces;
 using AuthService.DataContracts.User;
 using CommonInfrastructure.Http;
@@ -25,10 +24,34 @@ namespace AuthService.Main.Controllers
             return _userLogic.RegisterAsync(createContract);
         }
 
+        [HttpPatch]
+        public Task<CommonHttpResponse<UserViewModel>> UpdateUserAsync(UpdateUserContract contract)
+        {
+            return _userLogic.UpdateUserAsync(contract);
+        }
+
+        [HttpDelete]
+        public Task<CommonHttpResponse<bool>> DeleteUserAsync(DeleteUserContract contract)
+        {
+            return _userLogic.DeleteUserAsync(contract);
+        }
+
+        [HttpPatch]
+        public Task<CommonHttpResponse<bool>> RestoreUserAsync(DeleteUserContract contract)
+        {
+            return _userLogic.RestoreUserAsync(contract);
+        }
+
         [HttpPost]
         public Task<CommonHttpResponse<UserViewModel>> LoginAsync(LoginContract contract)
         {
             return _userLogic.LoginAsync(contract);
+        }
+
+        [HttpPatch]
+        public Task<CommonHttpResponse<UserViewModel>> ChangeUserPasswordAsync(ChangePasswordContract contract)
+        {
+            return _userLogic.ChangeUserPasswordAsync(contract);
         }
 
         [HttpPost]

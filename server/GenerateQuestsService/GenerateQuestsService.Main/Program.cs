@@ -6,8 +6,8 @@ using CommonDatabase.QuestDatabase.MappingProfiles;
 using CommonDatabase.QuestDatabase.Triggers;
 using GenerateQuestsService.Core.BusinessLogic;
 using GenerateQuestsService.DataContracts.DataContracts;
+using GenerateQuestsService.DataContracts.JsonHelpers;
 using GenerateQuestsService.DataContracts.Models.Stages;
-using GenerateQuestsService.Main.DeserializationHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -39,11 +39,14 @@ builder.Services.AddScoped<GenerateQuestLogic>();
 
 
 //добавляем контроллеры и конфигурируем Json опции при десериализации моделей
+//добавляем собственный полиморфный десериализатор
+//и десериализатор енамов
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.AllowInputFormatterExceptionMessages = true;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
+    //options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 

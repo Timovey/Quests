@@ -10,13 +10,8 @@ using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using AuthService.Database.Implements;
 using AuthService.DataContracts.RefreshToken;
 using AuthService.Database.Interfaces;
-using System.Diagnostics.Contracts;
-using AuthService.DataContracts.CommonContracts;
-using System.Collections.Generic;
 
 namespace AuthService.Core.BusinessLogic
 {
@@ -29,6 +24,11 @@ namespace AuthService.Core.BusinessLogic
         private readonly RoleManager<ApplicationUserRole> _roleManager;
         private readonly IMapper _mapper;
         private readonly IRefreshStorage _refreshStorage;
+
+        private const string UserDontExistError = "Нет пользователя с таким логином и паролем";
+        private const string EmptyRequestError = "Пустой запрос";
+        private string MethodError(string nameMethod) => $"Ошибка выполнения метода {nameMethod}";
+
         public UserLogic(GenerateTokenHelper tokenHelper, PasswordHashHelper hashHelper, 
             UserManager<ApplicationUser> userManager, RoleManager<ApplicationUserRole> roleManager,
             IMapper mapper, IRefreshStorage refreshStorage)
@@ -65,13 +65,8 @@ namespace AuthService.Core.BusinessLogic
                 string hashPassword = _hashHelper.ComputeHashPassword(createContract.Password);
 
                 //создаем пользователя по контракту
-                ApplicationUser user = new()
-                {
-                    PasswordHash = hashPassword,
-                    UserName = createContract.UserName,
-                    Name = createContract.Name,
-                    Surname = createContract.Surname,
-                };
+                var user = _mapper.Map<ApplicationUser>(createContract);
+                user.PasswordHash = hashPassword;
                 //создаем пользователя с его паролем
                 var createResult = await _userManager.CreateAsync(user, hashPassword);
                 
@@ -103,7 +98,234 @@ namespace AuthService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(RegisterAsync)}");
+                     MethodError(nameof(RegisterAsync))
+                   );
+            }
+        }
+
+        /// <summary>
+        /// Метод обновления пользователя
+        /// Пароль нужен для проверки подлинности пользователя
+        /// Но его нельзя поменять
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
+        public async Task<CommonHttpResponse<UserViewModel>> UpdateUserAsync(UpdateUserContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                    EmptyRequestError);
+            }
+            try
+            {
+                //находим пользователя по Id
+                var user = await _userManager.FindByIdAsync(contract.Id.ToString());
+                if (user == null || user.IsDeleted)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                           "Нет такого пользователя");
+                }
+                else if(!contract.RequestUserId.HasValue || user.Id != contract.RequestUserId.Value)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                            "Ах ты ж хитрожопый");
+                }
+                else
+                {
+                    //должны проверить смену логина пользователя
+                    //если ли с новый логинов пользователь
+                    if(user.UserName != contract.UserName)
+                    {
+                        var userWithUserName = await _userManager.FindByNameAsync(contract.UserName);
+                        if(userWithUserName != null) {
+                            return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                        "Пользователь с таким именем уже существует");
+                        }
+                    }
+                }
+
+                //хешируем пароль
+                string hashPassword = _hashHelper.ComputeHashPassword(contract.Password);
+
+
+                //если такой пользователь есть и хеши паролей идентичны
+                if (user != null && await _userManager.CheckPasswordAsync(user, hashPassword))
+                {
+                    //мапим контракт в юзера
+                    _mapper.Map(contract, user);
+                    //обновляем пользователя
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    
+                    if  (updateResult == null || !updateResult.Succeeded)
+                    {
+                        return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                       "Не удалось обновить пользователя");
+                    }
+
+                        //получаем роли для того, чтобы интегрировать их в токен
+                        var userRoles = await _userManager.GetRolesAsync(user);
+
+                    var result = _mapper.Map<UserViewModel>(user);
+
+                    //добавляем в к вью модели токен
+                    result.Token = _tokenHelper.GenerateJwtToken(user, hashPassword, userRoles);
+
+                    //генерируем refresh токен 
+                    string refreshToken = await AddRefreshToken(user);
+                    if (refreshToken.IsNullOrEmpty())
+                    {
+                        return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                          "Не удалось создать токен обновления");
+                    }
+                    result.RefreshToken = refreshToken;
+
+                    return CommonHttpHelper.BuildSuccessResponse(result);
+                }
+                else
+                {
+                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                        "Проверьте правильность пароля");
+                }
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                     MethodError(nameof(UpdateUserAsync)));
+            }
+        }
+
+        /// <summary>
+        /// Метод удаления пользователя bool по флагу
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
+        public async Task<CommonHttpResponse<bool>> DeleteUserAsync(DeleteUserContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                    EmptyRequestError);
+            }
+            try
+            {
+                //находим пользователя по Id
+                var userFindId = await _userManager.FindByIdAsync(contract.Id.ToString());
+                      
+                //и по имени
+                var userFindUserName = await _userManager.FindByNameAsync(contract.UserName);
+
+                //если поиск по Ид и Username не совпадает
+                if(userFindUserName == null || userFindId == null || !userFindUserName.Equals(userFindId))
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                      "Нет такого пользователя");
+                }
+                //защита от удаление этого пользователя другим
+                if (!contract.RequestUserId.HasValue || userFindId.Id != contract.RequestUserId.Value)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                            "Ах ты ж хитрожопый");
+                }
+
+                //хешируем пароль
+                string hashPassword = _hashHelper.ComputeHashPassword(contract.Password);
+
+                //если такой пользователь есть и хеши паролей идентичны
+                if (userFindId != null && await _userManager.CheckPasswordAsync(userFindId, hashPassword))
+                {
+                    userFindId.IsDeleted = true;
+                    //обновляем пользователя
+                    var updateResult = await _userManager.UpdateAsync(userFindId);
+
+                    if (updateResult == null || !updateResult.Succeeded)
+                    {
+                        return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                       "Не удалось удалить пользователя");
+                    }
+
+                    return CommonHttpHelper.BuildSuccessResponse(true);
+                }
+                else
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                        "Проверьте правильность пароля");
+                }
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<bool>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                     MethodError(nameof(DeleteUserAsync)));
+            }
+        }
+
+        /// <summary>
+        /// Метод восстановления пользователя
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
+        public async Task<CommonHttpResponse<bool>> RestoreUserAsync(DeleteUserContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                    EmptyRequestError);
+            }
+            try
+            {
+                //находим пользователя по Id
+                var userFindId = await _userManager.FindByIdAsync(contract.Id.ToString());
+
+                //и по имени
+                var userFindUserName = await _userManager.FindByNameAsync(contract.UserName);
+
+                //если поиск по Ид и Username не совпадает
+                if (userFindUserName == null || userFindId == null || !userFindUserName.Equals(userFindId))
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                      "Нет такого пользователя");
+                }
+                //защита от восстановления этого пользователя другим пользователем
+                if (!contract.RequestUserId.HasValue || userFindId.Id != contract.RequestUserId.Value)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                            "Ах ты ж хитрожопый");
+                }
+
+                //хешируем пароль
+                string hashPassword = _hashHelper.ComputeHashPassword(contract.Password);
+
+                //если такой пользователь есть и хеши паролей идентичны
+                if (userFindId != null && await _userManager.CheckPasswordAsync(userFindId, hashPassword))
+                {
+                    userFindId.IsDeleted = false;
+                    //обновляем пользователя
+                    var updateResult = await _userManager.UpdateAsync(userFindId);
+
+                    if (updateResult == null || !updateResult.Succeeded)
+                    {
+                        return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                       "Не удалось восстановить пользователя");
+                    }
+
+                    return CommonHttpHelper.BuildSuccessResponse(true);
+                }
+                else
+                {
+                    return CommonHttpHelper.BuildErrorResponse<bool>(initialError:
+                        "Проверьте правильность пароля");
+                }
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<bool>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                    MethodError(nameof(RestoreUserAsync)));
             }
         }
 
@@ -117,7 +339,7 @@ namespace AuthService.Core.BusinessLogic
             if (contract == null)
             {
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
-                    "Пустой запрос");
+                    EmptyRequestError);
             }
             try
             {
@@ -127,8 +349,14 @@ namespace AuthService.Core.BusinessLogic
                 //находим пользователя по имени
                 var user = await _userManager.FindByNameAsync(contract.UserName);
 
+                if(user.IsDeleted)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                  "Нет такого пользователя");
+                }
                 //если такой пользователь есть и хеши паролей идентичны
-                if (user != null && await _userManager.CheckPasswordAsync(user, hashPassword))
+
+                    if (user != null && await _userManager.CheckPasswordAsync(user, hashPassword))
                 {
 
                     //получаем роли для пользователя
@@ -151,23 +379,99 @@ namespace AuthService.Core.BusinessLogic
                     return CommonHttpHelper.BuildSuccessResponse(result, HttpStatusCode.OK);
                 }
                 return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
-                    "Нет пользователя с таким логином и паролем");
+                    UserDontExistError);
             }
             catch (Exception ex)
             {
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(LoginAsync)}");
+                     MethodError(nameof(LoginAsync)));
             }
         }
 
+        /// <summary>
+        /// Метод логина
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
+        public async Task<CommonHttpResponse<UserViewModel>> ChangeUserPasswordAsync(ChangePasswordContract contract)
+        {
+            if (contract == null)
+            {
+                return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                    EmptyRequestError);
+            }
+            try
+            {
+                //хешируем старый пароль
+                string oldHashPassword = _hashHelper.ComputeHashPassword(contract.OldPassword);
+
+                //находим пользователя по имени
+                var user = await _userManager.FindByNameAsync(contract.UserName);
+
+                if (!contract.RequestUserId.HasValue || user.Id != contract.RequestUserId.Value)
+                {
+                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                            "Ах ты ж хитрожопый");
+                }
+                //если такой пользователь есть и хеши паролей идентичны
+                if (user != null && !user.IsDeleted && await _userManager.CheckPasswordAsync(user, oldHashPassword))
+                {
+                    //хешируем новый пароль
+                    string newHashPassword = _hashHelper.ComputeHashPassword(contract.NewPassword);
+
+                    //меняем пароль
+                    var resultUpdate  = await _userManager.ChangePasswordAsync(user, oldHashPassword, newHashPassword);
+
+                    if(resultUpdate == null || !resultUpdate.Succeeded)
+                    {
+                        return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                            "Не удалось обновить пароль пользователя");
+                    }
+                    //получаем роли для пользователя
+                    var userRoles = await _userManager.GetRolesAsync(user);
+
+                    //мапим результат
+                    var result = _mapper.Map<UserViewModel>(user);
+                    //добавляем токен
+                    result.Token = _tokenHelper.GenerateJwtToken(user, newHashPassword, userRoles);
+
+                    //генерируем refresh токен 
+                    string refreshToken = await AddRefreshToken(user);
+                    if (refreshToken.IsNullOrEmpty())
+                    {
+                        return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
+                          "Не удалось создать токен обновления");
+                    }
+                    result.RefreshToken = refreshToken;
+
+                    return CommonHttpHelper.BuildSuccessResponse(result);
+                }
+                return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                    UserDontExistError);
+            }
+            catch (Exception ex)
+            {
+                return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
+                    HttpStatusCode.InternalServerError,
+                    ex.ToExceptionDetails(),
+                     MethodError(nameof(ChangeUserPasswordAsync)));
+            }
+        }
+
+        /// <summary>
+        /// Метод получения информации о пользователе 
+        /// по его логину и паролю
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
         public async Task<CommonHttpResponse<UserViewModel>> GetUserInfoAsync(LoginTokenContract contract)
         {
             if (contract == null)
             {
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
-                    "Пустой запрос");
+                    EmptyRequestError);
             }
             try
             {
@@ -183,7 +487,7 @@ namespace AuthService.Core.BusinessLogic
                     //находим пользователя по Id
                     var user = await _userManager.FindByIdAsync(userId.Value.ToString());
 
-                    if(user == null)
+                    if(user == null || user.IsDeleted)
                     {
                         return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
                     "Нет такого пользователя");
@@ -208,7 +512,7 @@ namespace AuthService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(GetUserInfoAsync)}");
+                     MethodError(nameof(GetUserInfoAsync)));
             }
         }
 
@@ -222,7 +526,7 @@ namespace AuthService.Core.BusinessLogic
             if (contract == null)
             {
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
-                    "Пустой запрос");
+                    EmptyRequestError);
             }
             try
             {
@@ -240,7 +544,12 @@ namespace AuthService.Core.BusinessLogic
                     //находим пользователя по Id
                     var user = await _userManager.FindByIdAsync(userId.Value.ToString());
 
-     
+                    if (user == null || user.IsDeleted)
+                    {
+                        return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                    "Нет такого пользователя");
+                    }
+
                     //получаем роли пользователя
                     var userRoles = await _userManager.GetRolesAsync(user);
                     //мапим во viewModel
@@ -263,16 +572,22 @@ namespace AuthService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse<UserViewModel>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(LoginByRefreshAsync)}");
+                     MethodError(nameof(LoginByRefreshAsync)));
             }
         }
 
+        /// <summary>
+        /// Метод получения юзера по id
+        /// Отправляется простая модель, без личных данных
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<CommonHttpResponse<ShortUserViewModel>> GetUserByIdAsync(int id)
         {
             if (id < 0)
             {
                 return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(initialError:
-                    "Пустой запрос");
+                    EmptyRequestError);
             }
             try
             {
@@ -282,7 +597,7 @@ namespace AuthService.Core.BusinessLogic
                 //мапим в простую viewModel
                 var result = _mapper.Map<ShortUserViewModel>(user);
 
-                if (user != null)
+                if (user != null && !user.IsDeleted)
                 {
                     return CommonHttpHelper.BuildSuccessResponse(result, HttpStatusCode.OK);
                 }
@@ -295,21 +610,28 @@ namespace AuthService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse<ShortUserViewModel>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(GetUserByIdAsync)}");
+                     MethodError(nameof(GetUserByIdAsync)));
             }
         }
 
+        /// <summary>
+        /// Метод получения фильтрованных юзеров
+        /// Выводится общая инфа по юзеру, без подробностей
+        /// </summary>
+        /// <param name="contract"></param>
+        /// <returns></returns>
         public async Task<CommonHttpResponse<IList<ShortUserViewModel>>> GetFilteredUsersAsync(GetFilteredUsersContract contract)
         {
             if (contract == null)
             {
                 return CommonHttpHelper.BuildErrorResponse<IList<ShortUserViewModel>> (initialError:
-                    "Пустой запрос");
+                    EmptyRequestError);
             }
             try
             {
                 //находим пользователей по Id
-                var users = _userManager.Users.Where(u => contract.Ids.Contains(u.Id)).ToList();
+                var users = _userManager.Users.Where(u => contract.Ids.Contains(u.Id))
+                    .Where(u => !u.IsDeleted).ToList();
 
                 var result = new List<ShortUserViewModel>();
                 foreach (var user in users)
@@ -324,7 +646,7 @@ namespace AuthService.Core.BusinessLogic
                 return CommonHttpHelper.BuildErrorResponse<IList<ShortUserViewModel>>(
                     HttpStatusCode.InternalServerError,
                     ex.ToExceptionDetails(),
-                     $"Ошибка выполнения метода {nameof(GetFilteredUsersAsync)}");
+                     MethodError(nameof(GetFilteredUsersAsync)));
             }
         }
 

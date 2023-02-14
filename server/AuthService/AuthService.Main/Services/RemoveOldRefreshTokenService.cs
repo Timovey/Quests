@@ -1,7 +1,6 @@
 ﻿using AuthService.Database.Interfaces;
 using AuthService.Main.SettingModels;
 using Microsoft.Extensions.Options;
-using System.Threading;
 
 namespace AuthService.Main.Services
 {

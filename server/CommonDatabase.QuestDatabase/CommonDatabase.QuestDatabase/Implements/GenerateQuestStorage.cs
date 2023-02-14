@@ -39,7 +39,7 @@ namespace CommonDatabase.QuestDatabase.Implements
                 return false;
             }
             _mapper.Map(contract, dbQuest);
-            //_questContext.Entry(dbQuest).State = EntityState.Modified;
+            _questContext.Entry(dbQuest).State = EntityState.Modified;
             await _questContext.SaveChangesAsync();
             return true;
         }
@@ -104,7 +104,7 @@ namespace CommonDatabase.QuestDatabase.Implements
             if (elem != null)
             {
                 //если это квест того юзера
-                if (contract.RequestUserId.HasValue && contract.RequestUserId == elem.Id)
+                if (contract.RequestUserId.HasValue && contract.RequestUserId == elem.UserId)
                 {
                     elem.IsDeleted = true;
                 }

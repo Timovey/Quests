@@ -31,5 +31,10 @@ namespace AuthService.DataContracts.User
         [Required(ErrorMessage = "Пароль обязателен к заполнению"),
          MaxLength(256, ErrorMessage = "Максимальная длина пароля 256 символов")]
         public string Password { get; set; }
+
+        /// <summary>
+        /// Аватар пользователя в Base64
+        /// </summary>
+        public string Img { get; set; }
     }
 }

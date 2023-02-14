@@ -35,7 +35,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationUserRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
-//!_! ------------------ Congigure
+//!_! ------------------ Configure
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<SecretSetting>(builder.Configuration.GetSection("Secret"));
 builder.Services.Configure<RefreshTokenServiceSetting>(builder.Configuration.GetSection("RefreshTokenService"));

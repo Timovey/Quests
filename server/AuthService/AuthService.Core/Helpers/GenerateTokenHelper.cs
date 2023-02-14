@@ -24,11 +24,12 @@ namespace AuthService.Core.Helpers
         public string GenerateJwtToken(ApplicationUser user, string hashPassword, IList<string> userRoles)
         {
             var jwt = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpiresMinutes),
-            claims: GetIdentity(user, hashPassword, userRoles),
-            signingCredentials: new SigningCredentials(_jwtSettings.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpiresMinutes),
+                claims: GetIdentity(user, hashPassword, userRoles),
+                signingCredentials: new SigningCredentials(_jwtSettings.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+            );
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             return encodedJwt;
