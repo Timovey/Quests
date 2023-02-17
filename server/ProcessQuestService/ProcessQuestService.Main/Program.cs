@@ -1,45 +1,52 @@
-using AuthService.DataContracts.Interfaces;
-using CommonDatabase.QuestDatabase;
-using CommonDatabase.QuestDatabase.Implements;
-using CommonDatabase.QuestDatabase.Interfaces;
-using CommonDatabase.QuestDatabase.MappingProfiles;
-using CommonDatabase.QuestDatabase.Triggers;
-using GenerateQuestsService.Core.BusinessLogic;
-using GenerateQuestsService.DataContracts.DataContracts;
+using GenerateQuestsService.DataContracts.Interfaces;
 using GenerateQuestsService.DataContracts.JsonHelpers;
 using GenerateQuestsService.DataContracts.Models.Stages;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using ProcessQuestService.Core.MappingProfiles;
 using Refit;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Caching.Distributed;
+using ProcessQuestService.Core.BusinessLogic;
+using ProcessQuestService.Core.Helpers;
+using ProcessQuestService.Core.HelperModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //подавляется фильтр для валидации модели по умолчанию
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.SuppressModelStateInvalidFilter = true;
+//builder.Services.Configure<ApiBehaviorOptions>(options =>
+//{
+//    options.SuppressModelStateInvalidFilter = true;
+//});
+
+
+//используем Postgesql
+//builder.Services.AddDbContext<QuestContext>(options =>
+//    options
+//    .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+//);
+
+//добавляем конфигурации
+var redisSettings = builder.Configuration.GetSection(nameof(RedisSetting)).Get<RedisSetting>();
+
+// добавление кэширования
+builder.Services.AddStackExchangeRedisCache(options => {
+    options.Configuration = redisSettings.Host;
+    options.InstanceName = redisSettings.InstanceName;
 });
 
 
-//используем Postgesql и триггеры
-builder.Services.AddDbContext<QuestContext>(options =>
-    options
-    .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-    .UseTriggers(triggerOptions => {
-        triggerOptions.AddTrigger<SetStageCountTrigger>();
-    })
-);
+builder.Services.Configure<RedisSetting>(builder.Configuration.GetSection(nameof(RedisSetting)));
 
 //раздел с конфигурацией ЖЦ 
-builder.Services.AddScoped<IGenerateQuestStorage, GenerateQuestStorage>();
-builder.Services.AddScoped<GenerateQuestLogic>();
 
+builder.Services.AddScoped<ProcessQuestLogic>();
+builder.Services.AddScoped<ProcessQuestCacheHelper>();
 
 //добавляем контроллеры и конфигурируем Json опции при десериализации моделей
 //добавляем собственный полиморфный десериализатор
+//и десериализатор енамов
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.AllowInputFormatterExceptionMessages = true;
@@ -50,7 +57,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 //добавляем Auto mapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfile>());
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ProcessQuestMappingProfile>());
 
 
 
@@ -73,10 +80,10 @@ var refitSettings = new RefitSettings
 
 
 //подключаемм Refit клиенты
-//!_! ------------------ Auth
-var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
-builder.Services.AddRefitClient<IAuthApi>(refitSettings)
-    .ConfigureHttpClient(c => c.BaseAddress = authAddress);
+//!_! ------------------ Generate Quest Service
+var generateQuestAddress = new Uri(builder.Configuration["GenerateQuestSettings:BaseAddress"]);
+builder.Services.AddRefitClient<IGenerateQuestsApi>(refitSettings)
+    .ConfigureHttpClient(c => c.BaseAddress = generateQuestAddress);
 
 
 var app = builder.Build();
@@ -91,5 +98,11 @@ if (app.Environment.IsDevelopment() || 1 == 1)
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(5)
+};
+app.UseWebSockets(webSocketOptions);
 
 app.Run();

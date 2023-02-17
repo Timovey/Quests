@@ -8,7 +8,7 @@ namespace QuestCore.TokenHelpers
         {
             if (expires != null)
             {
-                if (DateTime.UtcNow<expires.Value.ToUniversalTime())
+                if (DateTime.UtcNow < expires.Value.ToUniversalTime())
                 {
                     return true; // Still valid
                 }
