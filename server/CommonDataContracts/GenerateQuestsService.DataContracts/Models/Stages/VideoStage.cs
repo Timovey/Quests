@@ -1,5 +1,4 @@
 ﻿using GenerateQuestsService.DataContracts.Enums;
-using System.Runtime.Serialization;
 
 namespace GenerateQuestsService.DataContracts.Models.Stages
 {

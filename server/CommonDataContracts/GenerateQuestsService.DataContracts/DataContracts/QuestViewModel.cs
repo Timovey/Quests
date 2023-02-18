@@ -1,5 +1,4 @@
 ﻿using GenerateQuestsService.DataContracts.Models.Stages;
-using System.Text.Json.Serialization;
 
 namespace GenerateQuestsService.DataContracts.DataContracts
 {

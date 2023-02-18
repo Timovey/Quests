@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ProcessQuestService.Core.HelperModels
+﻿namespace ProcessQuestService.Core.HelperModels
 {
     public class ProcessModel
     {
@@ -12,6 +6,9 @@ namespace ProcessQuestService.Core.HelperModels
             UserProcessing = new Dictionary<int,int>();
         }
         public string Key { get; set; }
+
+        public string QuestId { get; set; }
+
         public IDictionary<int, int> UserProcessing { get; set; }
 
         public bool IsHaveUser(int userId)

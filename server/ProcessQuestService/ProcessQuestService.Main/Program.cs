@@ -1,13 +1,8 @@
 using GenerateQuestsService.DataContracts.Interfaces;
 using GenerateQuestsService.DataContracts.JsonHelpers;
-using GenerateQuestsService.DataContracts.Models.Stages;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using ProcessQuestService.Core.MappingProfiles;
 using Refit;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.Extensions.Caching.Distributed;
 using ProcessQuestService.Core.BusinessLogic;
 using ProcessQuestService.Core.Helpers;
 using ProcessQuestService.Core.HelperModels;
@@ -41,6 +36,7 @@ builder.Services.Configure<RedisSetting>(builder.Configuration.GetSection(nameof
 
 //раздел с конфигурацией ЖЦ 
 
+builder.Services.AddScoped<ConnectQuestLogic>();
 builder.Services.AddScoped<ProcessQuestLogic>();
 builder.Services.AddScoped<ProcessQuestCacheHelper>();
 
@@ -50,10 +46,7 @@ builder.Services.AddScoped<ProcessQuestCacheHelper>();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.AllowInputFormatterExceptionMessages = true;
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    options.JsonSerializerOptions.Converters.Add(new StageJsonConverterHelper<Stage>());
-    //options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.JsonSerializerOptions.SetQuestJsonSerializerOptions();
 });
 
 //добавляем Auto mapper

@@ -1,7 +1,6 @@
 ﻿using CommonInfrastructure.Http;
 using GenerateQuestsService.DataContracts.Models.Stages;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 
 namespace GenerateQuestsService.DataContracts.DataContracts
 {

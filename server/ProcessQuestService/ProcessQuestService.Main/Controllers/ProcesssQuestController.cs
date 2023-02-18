@@ -10,9 +10,9 @@ namespace ProcessQuestService.Main.Controllers
     [Route("[controller]/[action]")]
     public class ProcesssQuestController : ControllerBase
     {     
-        private ProcessQuestLogic _processQuestLogic;
+        private ConnectQuestLogic _processQuestLogic;
         
-        public ProcesssQuestController(ProcessQuestLogic processQuestLogic) {
+        public ProcesssQuestController(ConnectQuestLogic processQuestLogic) {
             _processQuestLogic = processQuestLogic;
         }
 
