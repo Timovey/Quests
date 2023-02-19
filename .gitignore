@@ -6,6 +6,9 @@
 #nuget
 nuget.config
 
+#postgres data
+postgres-data
+
 # User-specific files
 *.rsuser
 *.suo

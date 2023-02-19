@@ -17,14 +17,14 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//подавляется фильтр для валидации модели по умолчанию
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
 
 
-//используем Postgesql и триггеры
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Postgesql пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddDbContext<QuestContext>(options =>
     options
     .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -33,13 +33,13 @@ builder.Services.AddDbContext<QuestContext>(options =>
     })
 );
 
-//раздел с конфигурацией ЖЦ 
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 
 builder.Services.AddScoped<IGenerateQuestStorage, GenerateQuestStorage>();
 builder.Services.AddScoped<GenerateQuestLogic>();
 
 
-//добавляем контроллеры и конфигурируем Json опции при десериализации моделей
-//добавляем собственный полиморфный десериализатор
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Json пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.AllowInputFormatterExceptionMessages = true;
@@ -49,7 +49,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-//добавляем Auto mapper
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Auto mapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfile>());
 
 
@@ -58,8 +58,8 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<GenerateQuestsMappingProfil
 //builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//настраиваем Refit
-//ставим опцию сравнения без учета регистра
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Refit
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 // "Value" = "value"
 var refitSettings = new RefitSettings
 {
@@ -72,7 +72,7 @@ var refitSettings = new RefitSettings
 };
 
 
-//подключаемм Refit клиенты
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Refit пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 //!_! ------------------ Auth
 var authAddress = new Uri(builder.Configuration["AuthSettings:BaseAddress"]);
 builder.Services.AddRefitClient<IAuthApi>(refitSettings)
@@ -91,5 +91,16 @@ if (app.Environment.IsDevelopment() || 1 == 1)
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<QuestContext>();
+    if (context.Database.GetPendingMigrations().Any())
+    {
+        context.Database.Migrate();
+    }
+}
 
 app.Run();

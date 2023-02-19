@@ -10,16 +10,17 @@ WORKDIR /src
 COPY *.sln ./
 COPY ["server/CommonDataContracts/GenerateQuestsService.DataContracts/", "CommonDataContracts/GenerateQuestsService.DataContracts/"]
 COPY ["server/CommonDataContracts/AuthService.DataContracts/", "CommonDataContracts/AuthService.DataContracts/"]
-COPY ["server/QuestCore", "QuestCore"]
+COPY ["server/CommonDatabase.QuestDatabase/CommonDatabase.QuestDatabase/", "CommonDatabase.QuestDatabase/CommonDatabase.QuestDatabase/"]
+COPY ["server/GenerateQuestsService/", "GenerateQuestsService/"]
 COPY ["server/nuget.config", ""]
-RUN dotnet restore "QuestCore/QuestCore.csproj"
-WORKDIR "/src/QuestCore/"
-RUN dotnet build "QuestCore.csproj" -c Release -o /app/build
+RUN dotnet restore "GenerateQuestsService/GenerateQuestsService.Main/GenerateQuestsService.Main.csproj"
+WORKDIR "/src/GenerateQuestsService/GenerateQuestsService.Main"
+RUN dotnet build "GenerateQuestsService.Main.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "QuestCore.csproj" -c Release -o /app/publish
+RUN dotnet publish "GenerateQuestsService.Main.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QuestCore.dll"]
+ENTRYPOINT ["dotnet", "GenerateQuestsService.Main.dll"]

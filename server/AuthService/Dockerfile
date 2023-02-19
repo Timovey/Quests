@@ -8,18 +8,17 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY *.sln ./
-COPY ["server/CommonDataContracts/GenerateQuestsService.DataContracts/", "CommonDataContracts/GenerateQuestsService.DataContracts/"]
 COPY ["server/CommonDataContracts/AuthService.DataContracts/", "CommonDataContracts/AuthService.DataContracts/"]
-COPY ["server/QuestCore", "QuestCore"]
+COPY ["server/AuthService/", "AuthService/"]
 COPY ["server/nuget.config", ""]
-RUN dotnet restore "QuestCore/QuestCore.csproj"
-WORKDIR "/src/QuestCore/"
-RUN dotnet build "QuestCore.csproj" -c Release -o /app/build
+RUN dotnet restore "AuthService/AuthService.Main/AuthService.Main.csproj"
+WORKDIR "/src/AuthService/AuthService.Main"
+RUN dotnet build "AuthService.Main.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "QuestCore.csproj" -c Release -o /app/publish
+RUN dotnet publish "AuthService.Main.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QuestCore.dll"]
+ENTRYPOINT ["dotnet", "AuthService.Main.dll"]
