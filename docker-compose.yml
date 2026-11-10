@@ -1,7 +1,8 @@
 version: '3.9'
 
+# Секреты берутся из файла .env рядом с этим файлом (шаблон: .env.example).
 services:
-    
+
     postgresdb:
         image: postgres:latest
         ports:
@@ -10,11 +11,11 @@ services:
         volumes:
             - ./postgres-data:/var/lib/postgresql/data
         environment:
-            POSTGRES_PASSWORD: postgres
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
             POSTGRES_USER: postgres
             POSTGRES_DB: QuestsSharp
             PGDATA: "/var/lib/postgresql/data/pgdata"
-            
+
     auth-service:
         build:
             context: ./
@@ -22,6 +23,10 @@ services:
         ports:
             - 9004:80
         restart: on-failure
+        environment:
+            ConnectionStrings__DefaultConnection: Host=postgresdb;Port=5432;Database=QuestsSharp;Username=postgres;Password=${POSTGRES_PASSWORD}
+            Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+            Secret__PasswordHash: ${PASSWORD_HASH_SECRET:?set PASSWORD_HASH_SECRET in .env}
         depends_on:
             - postgresdb
 
@@ -32,9 +37,11 @@ services:
         ports:
             - 9005:80
         restart: on-failure
+        environment:
+            ConnectionStrings__DefaultConnection: Host=postgresdb;Port=5432;Database=QuestsSharp;Username=postgres;Password=${POSTGRES_PASSWORD}
         depends_on:
-            - postgresdb          
-    
+            - postgresdb
+
     quest-core:
         build:
             context: ./
@@ -42,6 +49,9 @@ services:
         ports:
             - 9003:80
         restart: on-failure
+        environment:
+            ConnectionStrings__DefaultConnection: Host=postgresdb;Port=5432;Database=QuestsSharp;Username=postgres;Password=${POSTGRES_PASSWORD}
+            Jwt__Key: ${JWT_KEY}
         depends_on:
             - postgresdb
 
