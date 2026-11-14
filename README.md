@@ -29,16 +29,17 @@ flowchart LR
 ## Запуск
 
 ```bash
-cp .env.example .env    # задайте пароль PostgreSQL, ключ JWT и секрет хэширования паролей
+cp .env.example .env    # задайте пароль PostgreSQL, ключ JWT, секрет хэширования паролей и NUGET_GITHUB_TOKEN
 docker compose up --build
 ```
 
 | Сервис | Адрес |
 | --- | --- |
 | QuestCore | http://localhost:9003 |
-| AuthService | http://localhost:9004 |
-| GenerateQuestsService | http://localhost:9005 |
 | PostgreSQL | localhost:5555 |
+
+AuthService и GenerateQuestsService наружу не публикуются: к ним обращается только QuestCore по внутренней сети
+docker compose.
 
 Секретов в репозитории нет: в `appsettings*.json` стоят заглушки `CHANGE_ME`, реальные значения docker compose
 передаёт из `.env` переменными окружения (`ConnectionStrings__DefaultConnection`, `Jwt__Key`,

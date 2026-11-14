@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using AuthService.DataContracts.RefreshToken;
 using AuthService.Database.Interfaces;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AuthService.Core.BusinessLogic
 {
@@ -349,14 +351,15 @@ namespace AuthService.Core.BusinessLogic
                 //находим пользователя по имени
                 var user = await _userManager.FindByNameAsync(contract.UserName);
 
-                if(user.IsDeleted)
+                //несуществующий и удалённый пользователь получают одинаковый ответ,
+                //чтобы по ответу нельзя было перебирать логины
+                if (user == null || user.IsDeleted)
                 {
-                    return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
-                  "Нет такого пользователя");
+                    return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                        UserDontExistError);
                 }
-                //если такой пользователь есть и хеши паролей идентичны
-
-                    if (user != null && await _userManager.CheckPasswordAsync(user, hashPassword))
+                //если хеши паролей идентичны
+                if (await _userManager.CheckPasswordAsync(user, hashPassword))
                 {
 
                     //получаем роли для пользователя
@@ -410,13 +413,18 @@ namespace AuthService.Core.BusinessLogic
                 //находим пользователя по имени
                 var user = await _userManager.FindByNameAsync(contract.UserName);
 
+                if (user == null)
+                {
+                    return CommonHttpHelper.BuildNotFoundErrorResponse<UserViewModel>(initialError:
+                        UserDontExistError);
+                }
                 if (!contract.RequestUserId.HasValue || user.Id != contract.RequestUserId.Value)
                 {
                     return CommonHttpHelper.BuildErrorResponse<UserViewModel>(initialError:
                             "Ах ты ж хитрожопый");
                 }
                 //если такой пользователь есть и хеши паролей идентичны
-                if (user != null && !user.IsDeleted && await _userManager.CheckPasswordAsync(user, oldHashPassword))
+                if (!user.IsDeleted && await _userManager.CheckPasswordAsync(user, oldHashPassword))
                 {
                     //хешируем новый пароль
                     string newHashPassword = _hashHelper.ComputeHashPassword(contract.NewPassword);
@@ -689,18 +697,27 @@ namespace AuthService.Core.BusinessLogic
             return null;
         }
 
-        private async Task<bool> CheckRefreshToken(string refreshToken, int userId)
+        private async Task<bool> CheckRefreshToken(string? refreshToken, int userId)
         {
+            //пустой токен не может совпасть ни с одним выданным
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return false;
+            }
+
+            //в выборку попадают только неудалённые и непросроченные токены пользователя
             var refreshTokens = await _refreshStorage.GetUserRefreshTokens(new GetRefreshesByUserContract()
             {
                 UserId = userId
             });
 
-            //и сразу находим идентичный рефрешу токен
-            var resRefresh = refreshTokens.Where(el =>
-                el.RefreshTokenValue.Contains(refreshToken)).FirstOrDefault();
-
-            return resRefresh == null ? false : true;
+            //только точное совпадение: сравнение подстрокой (Contains) пропускало любую часть токена,
+            //включая пустую строку. Сравнение за постоянное время не даёт подбирать токен по времени ответа.
+            var requestBytes = Encoding.UTF8.GetBytes(refreshToken);
+            return refreshTokens.Any(el =>
+                el.RefreshTokenValue != null &&
+                CryptographicOperations.FixedTimeEquals(
+                    Encoding.UTF8.GetBytes(el.RefreshTokenValue), requestBytes));
         }
 
         private async Task<string> AddRefreshToken(ApplicationUser user)

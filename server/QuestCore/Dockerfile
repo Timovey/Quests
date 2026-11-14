@@ -12,6 +12,7 @@ COPY ["server/CommonDataContracts/GenerateQuestsService.DataContracts/", "Common
 COPY ["server/CommonDataContracts/AuthService.DataContracts/", "CommonDataContracts/AuthService.DataContracts/"]
 COPY ["server/QuestCore", "QuestCore"]
 COPY ["server/nuget.config", ""]
+ARG NUGET_GITHUB_TOKEN
 RUN dotnet restore "QuestCore/QuestCore.csproj"
 WORKDIR "/src/QuestCore/"
 RUN dotnet build "QuestCore.csproj" -c Release -o /app/build

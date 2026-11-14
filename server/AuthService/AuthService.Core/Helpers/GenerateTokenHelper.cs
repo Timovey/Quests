@@ -48,12 +48,12 @@ namespace AuthService.Core.Helpers
         private IEnumerable<Claim> GetIdentity(ApplicationUser user, string hashPassword, IList<string> userRoles)
         {
 
-            //идентификация на основе логина, захешированного пароля
-            //также на всякий добавляем пароль
+            //идентификация на основе логина и идентификатора пользователя.
+            //Хеш пароля в токен НЕ кладём: payload JWT не шифруется и читается любым,
+            //у кого есть токен, а хеш можно перебрать офлайн.
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Hash, hashPassword),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };

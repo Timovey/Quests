@@ -38,6 +38,12 @@ namespace CommonDatabase.QuestDatabase.Implements
             {
                 return false;
             }
+            //редактировать квест может только его автор. Без этой проверки любой пользователь
+            //мог изменить чужой квест, а маппинг UserId <- RequestUserId ещё и переписывал автора.
+            if (!contract.RequestUserId.HasValue || contract.RequestUserId.Value != dbQuest.UserId)
+            {
+                return false;
+            }
             _mapper.Map(contract, dbQuest);
             _questContext.Entry(dbQuest).State = EntityState.Modified;
             await _questContext.SaveChangesAsync();

@@ -45,10 +45,11 @@ namespace ProcessQuestService.Main.Controllers
             while (!result.CloseStatus.HasValue)
             {
 
-                var process = await _processQuestLogic.ProcessAsync(buffer, result.Count, room);
+                var response = await _processQuestLogic.ProcessAsync(buffer, result.Count, room);
 
-                var request = Encoding.UTF8.GetBytes(process);
-                await webSocket.SendAsync(new ArraySegment<byte>(serverMsg, 0, serverMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                //ответ сериализуем в JSON и отправляем одним текстовым сообщением
+                var serverMsg = JsonSerializer.SerializeToUtf8Bytes(response);
+                await webSocket.SendAsync(new ArraySegment<byte>(serverMsg, 0, serverMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
 
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 

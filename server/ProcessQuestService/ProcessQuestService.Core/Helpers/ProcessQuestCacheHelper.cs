@@ -41,20 +41,15 @@ namespace ProcessQuestService.Core.Helpers
         public async Task RegisterProcessingAsync(string roomKey, int userId, string questId)
         {
             string processString =  await _cache.GetStringAsync(roomKey);
-            if(processString.IsNullOrEmpty()) {
-                var process = new ProcessModel()
-                {
-                    Key = roomKey,
-                    QuestId = questId
-                };
-                process.UserProcessing.Add(userId, 0);
-            }
-            else
+            //новую комнату раньше создавали, но не сохраняли в кеш
+            var process = GetProcessModel(processString) ?? new ProcessModel()
             {
-                var process = GetProcessModel(processString);
-                process.UserProcessing.Add(userId, 0);
-                await _cache.SetStringAsync(roomKey, JsonSerializer.Serialize(process));
-            }
+                Key = roomKey,
+                QuestId = questId
+            };
+            //повторное подключение того же пользователя не должно падать на Add
+            process.UserProcessing[userId] = 0;
+            await _cache.SetStringAsync(roomKey, JsonSerializer.Serialize(process));
         }
         private async Task AddRoomAsync(string roomKey)
         {
@@ -78,7 +73,8 @@ namespace ProcessQuestService.Core.Helpers
                 //если есть ключи комнат и такой уже есть - возвращаем тру
                 string rooms = await _cache.GetStringAsync(_redisSetting.RoomKey);
 
-                if(!rooms.IsNullOrEmpty() && rooms.Contains(roomKey)) {
+                //сравниваем ключи целиком: Contains по строке находил "12" внутри "1234"
+                if(!rooms.IsNullOrEmpty() && rooms.Split(',').Contains(roomKey)) {
                     return false;
                 }
                 await AddRoomAsync(roomKey);
@@ -94,23 +90,16 @@ namespace ProcessQuestService.Core.Helpers
             {
                 return false;
             }
-            else if(await _cache.GetStringAsync(questId) != null)
+            //перезаписываем квест при каждом подключении: так обновляются и данные, и срок хранения.
+            //Раньше вызывался RefreshAsync по ключу, равному JSON квеста (а не его id), без await,
+            //и он не продлевает абсолютный срок жизни записи.
+            await _cache.SetStringAsync(questId,
+                JsonSerializer.Serialize(quest),
+                new DistributedCacheEntryOptions()
             {
-                //делаем для того, чтобы обновилось время хранения квеста
-                _cache.RefreshAsync(_cache.GetString(questId));
-                return true;
-            }
-            else
-            {
-                //кешируем в зависимости от длительности квеста
-                await _cache.SetStringAsync(questId, 
-                    JsonSerializer.Serialize(quest),
-                    new DistributedCacheEntryOptions()
-                {
-                      AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-                });
-                return true;
-            }
+                  AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            });
+            return true;
         }
 
         public async Task<QuestViewModel> GetQuestAsync(string room)
@@ -119,11 +108,6 @@ namespace ProcessQuestService.Core.Helpers
             var process = GetProcessModel(roomString);
             return process == null ? null : 
                 GetQuestViewModel(await _cache.GetStringAsync(process.QuestId));
-        }
-
-        public async Task<StageProcess> GetNextStageAsync(string questId, Stage currentStage)
-        {
-           var stage = GetQuestViewModel(questId)
         }
 
         public bool IsQuestReady(int id)

@@ -11,6 +11,7 @@ COPY *.sln ./
 COPY ["server/CommonDataContracts/AuthService.DataContracts/", "CommonDataContracts/AuthService.DataContracts/"]
 COPY ["server/AuthService/", "AuthService/"]
 COPY ["server/nuget.config", ""]
+ARG NUGET_GITHUB_TOKEN
 RUN dotnet restore "AuthService/AuthService.Main/AuthService.Main.csproj"
 WORKDIR "/src/AuthService/AuthService.Main"
 RUN dotnet build "AuthService.Main.csproj" -c Release -o /app/build

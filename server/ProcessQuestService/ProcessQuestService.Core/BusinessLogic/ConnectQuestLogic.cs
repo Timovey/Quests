@@ -58,7 +58,8 @@ namespace ProcessQuestService.Core.BusinessLogic
                     //регистрируем прохождение
                     if(contract.RequestUserId.HasValue)
                     {
-                        await _cacheHelper.RegisterProcessingAsync(roomKey, contract.RequestUserId.Value);
+                        await _cacheHelper.RegisterProcessingAsync(roomKey, contract.RequestUserId.Value,
+                            questRes.Data.Id.ToString());
                     }
                     else
                     {

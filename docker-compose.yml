@@ -20,8 +20,12 @@ services:
         build:
             context: ./
             dockerfile: ./server/AuthService/Dockerfile
-        ports:
-            - 9004:80
+            args:
+                NUGET_GITHUB_TOKEN: ${NUGET_GITHUB_TOKEN:?set NUGET_GITHUB_TOKEN in .env}
+        # Внутренний сервис: доступен только QuestCore по сети compose. Если опубликовать порт, клиент
+        # обойдёт шлюз и сам подставит RequestUserId в тело запроса.
+        expose:
+            - "80"
         restart: on-failure
         environment:
             ConnectionStrings__DefaultConnection: Host=postgresdb;Port=5432;Database=QuestsSharp;Username=postgres;Password=${POSTGRES_PASSWORD}
@@ -34,8 +38,12 @@ services:
         build:
             context: ./
             dockerfile: ./server/GenerateQuestsService/Dockerfile
-        ports:
-            - 9005:80
+            args:
+                NUGET_GITHUB_TOKEN: ${NUGET_GITHUB_TOKEN:?set NUGET_GITHUB_TOKEN in .env}
+        # Внутренний сервис: доступен только QuestCore по сети compose. Если опубликовать порт, клиент
+        # обойдёт шлюз и сам подставит RequestUserId в тело запроса.
+        expose:
+            - "80"
         restart: on-failure
         environment:
             ConnectionStrings__DefaultConnection: Host=postgresdb;Port=5432;Database=QuestsSharp;Username=postgres;Password=${POSTGRES_PASSWORD}
@@ -46,6 +54,8 @@ services:
         build:
             context: ./
             dockerfile: ./server/QuestCore/Dockerfile
+            args:
+                NUGET_GITHUB_TOKEN: ${NUGET_GITHUB_TOKEN:?set NUGET_GITHUB_TOKEN in .env}
         ports:
             - 9003:80
         restart: on-failure

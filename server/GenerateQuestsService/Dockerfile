@@ -13,6 +13,7 @@ COPY ["server/CommonDataContracts/AuthService.DataContracts/", "CommonDataContra
 COPY ["server/CommonDatabase.QuestDatabase/CommonDatabase.QuestDatabase/", "CommonDatabase.QuestDatabase/CommonDatabase.QuestDatabase/"]
 COPY ["server/GenerateQuestsService/", "GenerateQuestsService/"]
 COPY ["server/nuget.config", ""]
+ARG NUGET_GITHUB_TOKEN
 RUN dotnet restore "GenerateQuestsService/GenerateQuestsService.Main/GenerateQuestsService.Main.csproj"
 WORKDIR "/src/GenerateQuestsService/GenerateQuestsService.Main"
 RUN dotnet build "GenerateQuestsService.Main.csproj" -c Release -o /app/build
